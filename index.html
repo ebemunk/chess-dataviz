@@ -2,14 +2,20 @@
 <meta charset="utf-8">
 <link href='http://fonts.googleapis.com/css?family=Roboto:300,400' rel='stylesheet' type='text/css'>
 <link href="style.css" rel="stylesheet">
-<title>Shamkir 2015 - Gashimov Memorial Analysis</title>
+<title>Chess Tournament Grapher</title>
 <body>
 
 <div id="wrapper">
+	<select id="tournament-selector">
+		<option value="worldChampionship2014.json">2014 World Chess Championship</option>
+		<option value="shamkir-gashimov-memorial-2015.json">2015 Shamkir Gashimov Memorial</option>
+	</select>
 	<select id="game-selector"></select>
 	<button id="random">Random Game</button>
 	<label><input type="checkbox" id="interactive-toggle" checked> Hover Guidelines</label>
 </div>
+
+<div id="wrapper" class="round"></div>
 
 <div id="wrapper">
 	<div id="player-info">
@@ -41,34 +47,51 @@
 	var tournament;
 	var tournamentArray = [];
 
-	d3.json('shamkir-gashimov-memorial-2015.json', function (error, data) {
-		tournament = data;
-		console.log(data);
+	function loadTournament(fileName) {
+		tournamentArray = [];
 
-		for( var round in tournament ) {
-			var roundGames = [];
+		d3.json(fileName, function (error, data) {
+			tournament = data;
 
-			for( var game in tournament[round][1] ) {
-				var val = tournament[round][1][game];
-				val.index = round + ',' + game;
+			for( var round in tournament ) {
+				var roundGames = [];
 
-				roundGames.push(val);
+				for( var game in tournament[round][1] ) {
+					var val = tournament[round][1][game];
+					val.index = round + ',' + game;
+
+					roundGames.push(val);
+				}
+
+				tournamentArray.push(roundGames);
 			}
 
-			tournamentArray.push(roundGames);
-		}
+			d3.select('#game-selector').selectAll('*').remove();
 
-		d3.select('#game-selector')
-			.selectAll('optgroup').data(tournamentArray).enter()
-				.append('optgroup')
-					.attr('label', function (d, i) { return 'Round ' + (i + 1); })
-				.selectAll('option').data(function (d) { return d; }).enter()
-					.append('option')
-						.attr('value', function (d, i) { return d.index; })
-						.text(function (d, i) { return d.white + ' - ' + d.black; })
-		;
+			d3.select('#game-selector')
+				.selectAll('optgroup').data(tournamentArray).enter()
+					.append('optgroup')
+						.attr('label', function (d, i) { return 'Round ' + (i + 1); })
+					.selectAll('option').data(function (d) { return d; }).enter()
+						.append('option')
+							.attr('value', function (d, i) { return d.index; })
+							.text(function (d, i) { return d.white + ' - ' + d.black; })
+			;
 
-		$('#random').click();
+			$('#random').click();
+		});
+	}
+
+	$('#tournament-selector').on('change', function () {
+		loadTournament($(this).val());
+	});
+
+	$('#tournament-selector').change();
+
+	$('#game-selector').on('change', function () {
+		var index = this.value.split(',');
+
+		graph.update(tournament[index[0]][1][index[1]]);
 	});
 
 	$('#random').on('click', function (d, i) {
@@ -76,19 +99,13 @@
 			return Math.floor(Math.random() * (max - min + 1)) + min;
 		}
 
-		var round = getRandomInt(1, tournament.length);
-		var gameNum = getRandomInt(1, tournament[1][1].length);
+		var round = getRandomInt(1, tournamentArray.length);
+		var gameNum = getRandomInt(1, tournamentArray[0].length);
 		var game = tournament[round][1][gameNum];
 
 		graph.update(game);
 		$('#game-selector').val(round + ',' + gameNum);
-	});
-
-	$('#game-selector').on('change', function () {
-		console.log(this.value);
-		var index = this.value.split(',');
-
-		graph.update(tournament[index[0]][1][index[1]]);
+		$('.round').text('Round ' + round);
 	});
 
 	$('#interactive-toggle').on('change', function () {

@@ -10,6 +10,12 @@ body {
 	text-align: center;
 }
 
+.round {
+	font-weight: bold;
+	font-size: 20px;
+	padding: 10px 0;
+}
+
 #player-info {
 	width: 200px;
 	min-width: 200px;
