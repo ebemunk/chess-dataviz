@@ -112,16 +112,16 @@ Promise.all(pages.map(throat(program.concurrency, function (o) {
 		if( ! tournament[scraped.round] ) tournament[scraped.round] = {};
 		if( ! tournament[scraped.round][scraped.match] ) tournament[scraped.round][scraped.match] = {};
 
-		var whiteImgPromise = fs.statAsync('../img/players/' + scraped.white + '.jpg')
+		var whiteImgPromise = fs.statAsync('img/players/' + scraped.white + '.jpg')
 		.catch(function () {
 			request('https://chess24.com' + scraped.whiteImg)
-				.pipe(fs.createWriteStream('../img/players/' + scraped.white + '.jpg'));
+				.pipe(fs.createWriteStream('img/players/' + scraped.white + '.jpg'));
 		});
 
-		var blackImgPromise = fs.statAsync('../img/players/' + scraped.black + '.jpg')
+		var blackImgPromise = fs.statAsync('img/players/' + scraped.black + '.jpg')
 		.catch(function () {
 			request('https://chess24.com' + scraped.blackImg)
-				.pipe(fs.createWriteStream('../img/players/' + scraped.black + '.jpg'));
+				.pipe(fs.createWriteStream('img/players/' + scraped.black + '.jpg'));
 		});
 
 		gamePromises.push(
@@ -142,7 +142,7 @@ Promise.all(pages.map(throat(program.concurrency, function (o) {
 	});
 
 	Promise.all(gamePromises).then(function () {
-		fs.writeFileAsync('../' + program.tournament + '.json', JSON.stringify(tournament, null, 4))
+		fs.writeFileAsync(program.tournament + '.json', JSON.stringify(tournament, null, 4))
 		.then(function () {
 			console.log('all good'.green);
 			// process.exit();
