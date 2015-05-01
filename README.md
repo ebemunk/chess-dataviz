@@ -7,8 +7,8 @@ Scrapes chess24.com for tournament data and displays move evaluation and move ti
 There are two tournaments loaded up, the 2014 World Chess Championship and the 2015 Shamkir Chess Tournament (Gashimov Memorial).
 
 ###Usage
-1) Use the scraper to get some tournament data. I'm not going to explain this sorry.
-2) Open index.html on any static file server & choose the json it created.
+1. Use the scraper to get some tournament data. I'm not going to explain this sorry.
+2. Open index.html on any static file server & choose the json it created.
 
 ###License
 Do whatever you want.
