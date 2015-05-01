@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link href='http://fonts.googleapis.com/css?family=Roboto:300,400' rel='stylesheet' type='text/css'>
+<link href="style.css" rel="stylesheet">
+<title>Shamkir 2015 - Gashimov Memorial Analysis</title>
+<body>
+
+<div id="wrapper">
+	<select id="game-selector"></select>
+	<button id="random">Random Game</button>
+	<label><input type="checkbox" id="interactive-toggle" checked> Hover Guidelines</label>
+</div>
+
+<div id="wrapper">
+	<div id="player-info">
+		<div class="player white">
+			<div class="image"><img></div>
+			<div class="name"></div>
+			<div class="rating"></div>
+		</div>
+
+		<div class="result">
+		</div>
+
+		<div class="player black">
+			<div class="image"><img></div>
+			<div class="name"></div>
+			<div class="rating"></div>
+		</div>
+	</div>
+	<div id="graph" class="graph"></div>
+</div>
+
+<script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="graph.js"></script>
+
+<script>
+	var graph = new ChessGraph('#graph', '#player-info');
+
+	var tournament;
+	var tournamentArray = [];
+
+	d3.json('shamkir-gashimov-memorial-2015.json', function (error, data) {
+		tournament = data;
+		console.log(data);
+
+		for( var round in tournament ) {
+			var roundGames = [];
+
+			for( var game in tournament[round][1] ) {
+				var val = tournament[round][1][game];
+				val.index = round + ',' + game;
+
+				roundGames.push(val);
+			}
+
+			tournamentArray.push(roundGames);
+		}
+
+		d3.select('#game-selector')
+			.selectAll('optgroup').data(tournamentArray).enter()
+				.append('optgroup')
+					.attr('label', function (d, i) { return 'Round ' + (i + 1); })
+				.selectAll('option').data(function (d) { return d; }).enter()
+					.append('option')
+						.attr('value', function (d, i) { return d.index; })
+						.text(function (d, i) { return d.white + ' - ' + d.black; })
+		;
+
+		$('#random').click();
+	});
+
+	$('#random').on('click', function (d, i) {
+		function getRandomInt(min, max) {
+			return Math.floor(Math.random() * (max - min + 1)) + min;
+		}
+
+		var round = getRandomInt(1, tournament.length);
+		var gameNum = getRandomInt(1, tournament[1][1].length);
+		var game = tournament[round][1][gameNum];
+
+		graph.update(game);
+		$('#game-selector').val(round + ',' + gameNum);
+	});
+
+	$('#game-selector').on('change', function () {
+		console.log(this.value);
+		var index = this.value.split(',');
+
+		graph.update(tournament[index[0]][1][index[1]]);
+	});
+
+	$('#interactive-toggle').on('change', function () {
+		graph.options.interactive = $(this).is(':checked');
+	});
+</script>
+
+</body>
+</html>
