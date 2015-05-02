@@ -29,6 +29,7 @@ function ChessGraph(selector, playerInfoSelector, options) {
 	this.yEvalScale = d3.scale.linear()
 		.range([this.height, 0])
 		.domain([-5, 5]) //static
+		.clamp(true)
 	;
 
 	this.yTimeScale = d3.scale.linear()
