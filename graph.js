@@ -303,8 +303,6 @@ ChessGraph.prototype.init = function() {
 ChessGraph.prototype.update = function(game) {
 	var self = this;
 
-	console.log(this.container[0], game);
-
 	this.game = game;
 
 	//set scale domains
@@ -465,6 +463,5 @@ ChessGraph.prototype.updatePlayers = function(game) {
 	this.playerInfoContainer.select('.black .image img').attr('src', game.blackImg);
 
 	var winner = game.winner == 'draw' ? 'draw' : game.winner + ' wins';
-
 	this.playerInfoContainer.select('.result').text(winner);
 };
