@@ -142,7 +142,7 @@ Promise.all(pages.map(throat(program.concurrency, function (o) {
 	});
 
 	Promise.all(gamePromises).then(function () {
-		fs.writeFileAsync(program.tournament + '.json', JSON.stringify(tournament, null, 4))
+		fs.writeFileAsync('data/' + program.tournament + '.json', JSON.stringify(tournament, null, 4))
 		.then(function () {
 			console.log('all good'.green);
 			// process.exit();

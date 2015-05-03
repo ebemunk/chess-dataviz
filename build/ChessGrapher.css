@@ -1,0 +1,90 @@
+.cg-eval-time .graph {
+  display: table-cell;
+  vertical-align: middle;
+  font-weight: 300;
+}
+.cg-eval-time .axis {
+  font-size: 12px;
+  font-weight: 400;
+}
+.cg-eval-time .axis path,
+.cg-eval-time .axis line {
+  fill: none;
+  stroke: black;
+}
+.cg-eval-time .axis .axis-label {
+  fill: #777;
+}
+.cg-eval-time .bar {
+  opacity: 0.9;
+}
+.cg-eval-time .bar.white {
+  fill: white;
+}
+.cg-eval-time .line {
+  fill: none;
+  stroke: black;
+  stroke-width: 1.5px;
+}
+.cg-eval-time .line.white {
+  stroke: white;
+}
+.cg-eval-time .area {
+  fill: black;
+  opacity: 0.65;
+}
+.cg-eval-time .area.white {
+  fill: white;
+}
+.cg-eval-time .eval-guides {
+  opacity: 0.75;
+}
+.cg-eval-time .eval-guide-line {
+  stroke: black;
+  fill: none;
+  stroke-dasharray: 9 4;
+  stroke-width: 0.5px;
+}
+.cg-eval-time .eval-guide-text {
+  font-size: 10px;
+  text-transform: uppercase;
+}
+.cg-eval-time .interactive-layer {
+  fill: none;
+}
+.cg-eval-time .interactive-layer .guide {
+  stroke: red;
+  stroke-width: 1px;
+  stroke-dasharray: 5 1;
+}
+.cg-eval-time .interactive-layer .guide.hidden {
+  display: none;
+}
+.cg-eval-time .player-info {
+  width: 200px;
+  min-width: 200px;
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center;
+}
+.cg-eval-time .player-info .player-result {
+  margin: 50% 0;
+  text-transform: uppercase;
+}
+.cg-eval-time .player-info .player-image img {
+  overflow: hidden;
+  border-radius: 50%;
+}
+.cg-eval-time .player-info .player-white .player-image img {
+  border: white 5px solid;
+}
+.cg-eval-time .player-info .player-black .player-image img {
+  border: black 5px solid;
+}
+.cg-eval-time.wrap {
+  display: table;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/*# sourceMappingURL=ChessGrapher.css.map */
