@@ -9,12 +9,16 @@
   "author": "Bugra Firat",
   "dependencies": {
     "bluebird": "^2.9.24",
+    "chessli.js": "^1.1.0",
     "colors": "^1.0.3",
     "commander": "^2.8.1",
     "debug": "^2.1.3",
     "deepmerge": "^0.2.7",
     "phantom": "^0.7.2",
+    "phantom-as-promise": "0.0.3",
+    "progress": "^1.1.8",
     "request": "^2.55.0",
+    "targz": "^1.0.1",
     "throat": "^2.0.2"
   },
   "private": true,

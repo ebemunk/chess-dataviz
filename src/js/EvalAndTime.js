@@ -1,13 +1,41 @@
 import merge from 'deepmerge';
-import * as util from './util';
+import debug from 'debug';
 
-export class EvalAndTimeGraph {
+let dbg = debug('cv:EvalAndTime');
+
+/*
+Plots evaluation & time usage for a game.
+Expects a game object such as:
+{
+	black: 'Giri, Anish',
+	blackElo: '2790',
+	blackImg: 'img/players/Giri.jpg',
+
+	white: 'Anand, Viswanathan',
+	whiteElo: '2791',
+	whiteImg: 'img/player/Anand.jpg',
+
+	winner: 'draw' OR 'white' OR 'black',
+
+	notation: [
+		{score: 0.15, time: 0.6}, //must not be strings
+		...
+	]
+}
+
+*/
+export class EvalAndTime {
 	constructor(selector, options) {
+		let self = this;
+
 		if( ! selector ) throw Error('need dom selector');
+
+		//container
 		this.selector = selector;
 
 		this.container = d3.select(selector);
 
+		//options
 		let defaultOptions = {
 			playerPaneWidth: 200,
 			width: 960,
@@ -61,12 +89,6 @@ export class EvalAndTimeGraph {
 			.tickFormat(d => Math.abs(d))
 		;
 
-		this.init();
-	}
-
-	init() {
-		let self = this;
-
 		//clear element
 		this.container.selectAll('*').remove();
 
@@ -118,7 +140,7 @@ export class EvalAndTimeGraph {
 				.attr('class', 'axis x')
 				.call(this.xAxis)
 			.append('text')
-				.attr('text-anchor', 'end')
+				.attr('text-anchor', 'middle')
 				.attr('transform', 'translate(' + this.width / 2 + ',-25)')
 				.text('moves (ply)')
 				.attr('class', 'axis-label')
@@ -452,55 +474,6 @@ export class EvalAndTimeGraph {
 		playerInfo.select('.player-black .player-rating').text(this.game.blackElo);
 		playerInfo.select('.player-black .player-image img').attr('src', '/' + this.game.blackImg);
 
-		let winner;
-
-		if( this.game.avgGame ) {
-			winner = 'averaged games'
-		} else {
-			winner = this.game.winner == 'draw' ? 'draw' : this.game.winner + ' wins';
-		}
-
-		playerInfo.select('.player-result').text(winner);
-	}
-
-	static averageEvalAndTime(tournament, percentage = false) {
-		let games = util.tournamentObjToArray(tournament, true);
-
-		let avgGame = {
-			white: 'White',
-			whiteImg: 'img/players/white.jpg',
-			black: 'Black',
-			blackImg: 'img/players/black.jpg',
-			avgGame: true,
-			notation: []
-		};
-
-		for( let game of games ) {
-			game = util.parseGameNotation(game);
-console.log('NG');
-			game.notation.forEach((move, i) => {
-				let index = percentage ? Math.round(i / game.notation.length * 100) : i;
-if(i % 2 == 0)
-console.log(move.time);
-				if( avgGame.notation[index] ) {
-					avgGame.notation[index].score += move.score;
-					avgGame.notation[index].time += move.time;
-					avgGame.notation[index].count++;
-				} else {
-					avgGame.notation[index] = {
-						score: move.score,
-						time: move.time,
-						count: 1
-					};
-				}
-			});
-		}
-
-		avgGame.notation.map((move) => {
-			move.score /= move.count;
-			move.time /= move.count;
-		});
-
-		return avgGame;
+		playerInfo.select('.player-result').text(this.game.winner);
 	}
 }

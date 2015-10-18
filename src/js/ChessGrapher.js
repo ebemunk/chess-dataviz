@@ -1,8 +1,12 @@
 import * as util from './util';
-import {EvalAndTimeGraph} from './EvalAndTimeGraph';
+import {EvalAndTime} from './EvalAndTime';
+import {HeatMap} from './HeatMap';
+import {Openings} from './Openings';
 
 export var ChessGrapher = {
-	EvalAndTimeGraph,
+	EvalAndTime,
+	HeatMap,
+	Openings,
 	util
 };
 

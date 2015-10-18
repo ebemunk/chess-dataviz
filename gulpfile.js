@@ -16,7 +16,7 @@ var browserSync = require('browser-sync').create();
 
 gulp.task('js', function () {
 	return browserify('./src/js/ChessGrapher.js', {debug: true})
-		.add(require.resolve('babel/polyfill'))
+		// .add(require.resolve('babel/polyfill'))
 		.transform(babelify)
 		.bundle()
 			.on('error', function (err) {

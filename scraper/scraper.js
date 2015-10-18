@@ -1,31 +1,77 @@
+'use strict';
+
 var debug = require('debug')('scraper');
 
 var phantom = require('phantom');
+var request = require('request');
 
 var Promise = require('bluebird');
-var throat = require('throat')(Promise);
 var colors = require('colors');
-
-var request = require('request');
+var progress = require('progress');
 
 var fs = require('fs');
 Promise.promisifyAll(fs);
-
-var program = require('commander');
-program
+var requestAsync = Promise.promisify(require('request'));
+var args = require('commander');
+args
 	.version('1.0.0')
 	.option('-t, --tournament <tournament>', 'Tournament Name (id)', 'shamkir-gashimov-memorial-2015')
 	.option('-r, --rounds <rounds>', 'Number of rounds', 9, parseInt)
 	.option('-m, --matches <matches>', 'Number of matches per round', 1, parseInt)
 	.option('-g, --games <games>', 'Number of games per match', 5, parseInt)
 	.option('-c, --concurrency <concurrency>', 'Concurrency', 5, parseInt)
+	.option('-w, --wait <wait>', 'Wait before scraping (ms)', 15000, parseInt)
 	.parse(process.argv)
 ;
 
-debug('rounds'.cyan, program.rounds);
-debug('matches'.cyan, program.matches);
-debug('games'.cyan, program.games);
-debug('conc'.cyan, program.concurrency);
+console.log('  tournament'.cyan, args.tournament);
+console.log('  rounds'.cyan, args.rounds);
+console.log('  matches'.cyan, args.matches);
+console.log('  games'.cyan, args.games);
+console.log('  concurrency'.cyan, args.concurrency);
+console.log('  wait'.cyan, args.wait);
+
+console.log('  Starting scrape.'.cyan);
+
+var bar = new progress('    scraping [:bar] :percent', {
+	total: args.rounds * args.matches * args.games
+});
+
+var pages = [];
+
+for(let r=1; r<=args.rounds; r++) {
+	for(let m=1; m<=args.matches; m++) {
+		for(let g=1; g<=args.games; g++) {
+			pages.push({r: r, m:m, g:g});
+		}
+	}
+}
+
+Promise.map(pages, Promise.coroutine(function* (o) {
+	var data = yield scrapePage(args.tournament, o.r, o.m, o.g);
+	bar.tick();
+	return data;
+}), {concurrency: args.concurrency})
+.then(function (scrapedData) {
+	console.log('  Pages scraped, downloading player images.'.cyan);
+
+	return Promise.map(scrapedData, Promise.coroutine(function* (scraped) {
+		var game = scraped;
+		game.whiteImg = yield requestPipeToFile(scraped.whiteImg, 'img/players/' + scraped.white + '.jpg');
+		game.blackImg = yield requestPipeToFile(scraped.blackImg, 'img/players/' + scraped.black + '.jpg');
+
+		return yield Promise.resolve(game);
+	}));
+})
+.then(function (games) {
+	console.log('  Scrape finished.'.cyan);
+
+	return fs.writeFileAsync('data/' + args.tournament + '.json', JSON.stringify(games, null, 4))
+})
+.then(function () {
+	console.log('  All done.'.cyan);
+});
+
 
 function scrapePage(tournament, round, match, game) {
 	return new Promise(function (resolve, reject) {
@@ -75,9 +121,10 @@ function scrapePage(tournament, round, match, game) {
 								scraped.match = match;
 								scraped.game = game;
 
+								ph.exit();
 								resolve(scraped);
 							});
-						}, 15000);
+						}, args.wait);
 					});
 				});
 			},
@@ -90,62 +137,36 @@ function scrapePage(tournament, round, match, game) {
 	});
 }
 
-var pages = [];
-
-for(var r=1; r<=program.rounds; r++) {
-	for(var m=1; m<=program.matches; m++) {
-		for(var g=1; g<=program.games; g++) {
-			pages.push({r: r, m:m, g:g});
-		}
-	}
-}
-
-var tournament = {};
-
-var gamePromises = [];
-
-Promise.all(pages.map(throat(program.concurrency, function (o) {
-	return scrapePage(program.tournament, o.r, o.m, o.g);
-})))
-.then(function (scrapedData) {
-	scrapedData.forEach(function (scraped) {
-		if( ! tournament[scraped.round] ) tournament[scraped.round] = {};
-		if( ! tournament[scraped.round][scraped.match] ) tournament[scraped.round][scraped.match] = {};
-
-		var whiteImgPromise = fs.statAsync('img/players/' + scraped.white + '.jpg')
-		.catch(function () {
-			request('https://chess24.com' + scraped.whiteImg)
-				.pipe(fs.createWriteStream('img/players/' + scraped.white + '.jpg'));
-		});
-
-		var blackImgPromise = fs.statAsync('img/players/' + scraped.black + '.jpg')
-		.catch(function () {
-			request('https://chess24.com' + scraped.blackImg)
-				.pipe(fs.createWriteStream('img/players/' + scraped.black + '.jpg'));
-		});
-
-		gamePromises.push(
-			Promise.all([whiteImgPromise, blackImgPromise])
-			.then(function () {
-				tournament[scraped.round][scraped.match][scraped.game] = {
-					black: scraped.black,
-					blackElo: scraped.blackElo,
-					white: scraped.white,
-					whiteElo: scraped.whiteElo,
-					notation: scraped.notation,
-					winner: scraped.winner,
-					whiteImg: 'img/players/' + scraped.white + '.jpg',
-					blackImg: 'img/players/' + scraped.black + '.jpg'
-				};
+function requestPipeToFile(url, filepath) {
+	return fs.statAsync(filepath)
+	.then(function () {
+		return filepath;
+	})
+	.catch(function () {
+		return new Promise(function (resolve, reject) {
+			var stream = fs.createWriteStream(filepath)
+			.on('finish', function () {
+				return resolve(filepath);
 			})
-		);
-	});
+			.on('error', reject);
 
-	Promise.all(gamePromises).then(function () {
-		fs.writeFileAsync('data/' + program.tournament + '.json', JSON.stringify(tournament, null, 4))
-		.then(function () {
-			console.log('all good'.green);
-			// process.exit();
+			request({
+				url: url,
+				gzip: true,
+				encoding: null
+			})
+			.on('error', reject)
+			.pipe(stream);
 		});
+	})
+	.catch(function (e) {
+		// console.log(e);
+		return fs.unlinkAsync(filepath);
+	})
+	.catch(function (e) {
+
+	})
+	.finally(function () {
+		return filepath;
 	});
-});
+}
