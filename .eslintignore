@@ -1,0 +1,5 @@
+node_modules/
+dist/
+data/
+src/js/Openings.js
+src/js/HeatMap.js

@@ -33,9 +33,9 @@ export function parseGameNotation(game) {
 	let parsedGame = JSON.parse(JSON.stringify(game));
 
 	parsedGame.notation.map((move, i) => move.time = parseMinutes(move, i));
-	parsedGame.notation.map((move, i) => move.score = parseScore(move));
+	parsedGame.notation.map((move) => move.score = parseScore(move));
 
-	let winner = parsedGame.winner == 'draw' ? 'draw' : parsedGame.winner + ' wins';
+	// let winner = parsedGame.winner == 'draw' ? 'draw' : parsedGame.winner + ' wins';
 
 	return parsedGame;
 }

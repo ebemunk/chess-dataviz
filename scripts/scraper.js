@@ -1,17 +1,18 @@
+/*eslint no-console: 0*/
+/*eslint no-unused-vars: 0*/
+
 'use strict';
 
 var debug = require('debug')('scraper');
 
 var phantom = require('phantom');
-var request = require('request');
-
 var Promise = require('bluebird');
 var colors = require('colors');
 var progress = require('progress');
+var request = require('request');
+var fs = Promise.promisifyAll(require('fs'));
+var mkdirp = Promise.promisify(require('mkdirp'));
 
-var fs = require('fs');
-Promise.promisifyAll(fs);
-var requestAsync = Promise.promisify(require('request'));
 var args = require('commander');
 args
 	.version('1.0.0')
@@ -23,6 +24,9 @@ args
 	.option('-w, --wait <wait>', 'Wait before scraping (ms)', 15000, parseInt)
 	.parse(process.argv)
 ;
+
+var dataDir = 'data/';
+var imgDir = 'data/img/players/';
 
 console.log('  tournament'.cyan, args.tournament);
 console.log('  rounds'.cyan, args.rounds);
@@ -57,21 +61,25 @@ Promise.map(pages, Promise.coroutine(function* (o) {
 
 	return Promise.map(scrapedData, Promise.coroutine(function* (scraped) {
 		var game = scraped;
-		game.whiteImg = yield requestPipeToFile(scraped.whiteImg, 'img/players/' + scraped.white + '.jpg');
-		game.blackImg = yield requestPipeToFile(scraped.blackImg, 'img/players/' + scraped.black + '.jpg');
+		console.log(scraped);
+		game.whiteImg = yield requestPipeToFile(scraped.whiteImg, imgDir + scraped.white + '.jpg');
+		game.blackImg = yield requestPipeToFile(scraped.blackImg, imgDir + scraped.black + '.jpg');
 
 		return yield Promise.resolve(game);
 	}));
 })
 .then(function (games) {
-	console.log('  Scrape finished.'.cyan);
+	console.log('  Scrape finished.'.green);
 
-	return fs.writeFileAsync('data/' + args.tournament + '.json', JSON.stringify(games, null, 4))
+	return [games, mkdirp(dataDir)];
+})
+.spread(function (games) {
+	var json = JSON.stringify(games, null, 4);
+	return fs.writeFileAsync('data/' + args.tournament + '.json', json);
 })
 .then(function () {
-	console.log('  All done.'.cyan);
+	console.log('  All done.'.green);
 });
-
 
 function scrapePage(tournament, round, match, game) {
 	return new Promise(function (resolve, reject) {
@@ -85,12 +93,13 @@ function scrapePage(tournament, round, match, game) {
 					page.open(url, function (status) {
 						setTimeout(function () {
 							page.evaluate(function () {
+								/*global $*/
 								var notation = $('span[class^="notation-"]').map(function (i, notation) {
 									return {
 										move: $(notation).find('.move').text(),
 										score: $(notation).find('.engine').text(),
 										time: $(notation).find('.timeUsage').text() || '0s'
-									}
+									};
 								}).get();
 
 								var winner = $('.playerInfo.white .score').text();
@@ -138,33 +147,30 @@ function scrapePage(tournament, round, match, game) {
 }
 
 function requestPipeToFile(url, filepath) {
+	console.log('req', url, filepath);
 	return fs.statAsync(filepath)
 	.then(function () {
 		return filepath;
 	})
 	.catch(function () {
-		return new Promise(function (resolve, reject) {
-			var stream = fs.createWriteStream(filepath)
-			.on('finish', function () {
-				return resolve(filepath);
-			})
-			.on('error', reject);
+		return mkdirp(imgDir)
+		.then(function () {
+			return new Promise(function (resolve, reject) {
+				var stream = fs.createWriteStream(filepath)
+				.on('finish', function () {
+					return resolve(filepath);
+				})
+				.on('error', reject);
 
-			request({
-				url: url,
-				gzip: true,
-				encoding: null
-			})
-			.on('error', reject)
-			.pipe(stream);
+				request({
+					url: url,
+					gzip: true,
+					encoding: null
+				})
+				.on('error', reject)
+				.pipe(stream);
+			});
 		});
-	})
-	.catch(function (e) {
-		// console.log(e);
-		return fs.unlinkAsync(filepath);
-	})
-	.catch(function (e) {
-
 	})
 	.finally(function () {
 		return filepath;

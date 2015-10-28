@@ -1,7 +1,9 @@
-import merge from 'deepmerge';
-import debug from 'debug';
+/*global d3*/
 
-let dbg = debug('cv:EvalAndTime');
+import _ from 'lodash';
+import dbg from 'debug';
+
+var debug = dbg('cv:EvalAndTime');
 
 /*
 Plots evaluation & time usage for a game.
@@ -51,7 +53,9 @@ export class EvalAndTime {
 
 		options = options || {};
 
-		this.options = merge(defaultOptions, options);
+		this.options = _.merge({}, defaultOptions, options);
+
+		debug('options', this.options);
 
 		this.width = this.options.width - this.options.playerPaneWidth - this.options.margin.left - this.options.margin.right;
 		this.height = this.options.height - this.options.margin.top - this.options.margin.bottom;
@@ -184,6 +188,7 @@ export class EvalAndTime {
 
 		let evalGuideTexts = [
 			{y: 0.5, dy: 10, text: 'equal'},
+
 			{y: 1, dy: 10, text: 'white is slightly better'},
 			{y: 2, dy: 10, text: 'white is much better'},
 			{y: 2, dy: -5, text: 'white is winning'},
@@ -268,6 +273,8 @@ export class EvalAndTime {
 			.attr('pointer-events', 'all')
 			.attr('class', 'mouse-absorb')
 			.on('mousemove', function () {
+				/*eslint no-empty: 0*/
+
 				//disregard if options.interactive is off
 				if( ! self.options.interactive ) return;
 
@@ -323,7 +330,7 @@ export class EvalAndTime {
 
 				//hide guidelines on mouseout
 				interactiveLayer.selectAll('.interactive-layer .guide')
-					.classed('hidden', true)
+					.classed('hidden', true);
 			})
 		;
 	}

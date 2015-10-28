@@ -1,0 +1,75 @@
+<html>
+<head>
+<link href="/dist/ChessGrapher.css" rel="stylesheet">
+<style>
+	body {
+		background-color: lightgray;
+		font-family: Roboto, sans-serif;
+	}
+</style>
+</head>
+<body>
+
+<div id="eval-and-time-graph" class="cg-eval-time wrap"></div>
+
+<div id="squtil" class="cg-heatmap"></div>
+<select id="kek">
+	<option value="squareUtilization">squtil</option>
+	<option value="moveSquares">moveSquares</option>
+	<option value="captureSquares">captureSquares</option>
+	<option value="checkSquares">checkSquares</option>
+</select>
+
+<div id="ops" class="cg-openings">
+    <div id="main">
+      <div id="sequence"></div>
+      <div id="chart">
+        <div id="explanation" style="visibility: hidden;">
+          <span id="percentage"></span><br/>
+          of visits begin with this sequence of pages
+        </div>
+      </div>
+    </div>
+    <div id="sidebar">
+      <input type="checkbox" id="togglelegend"> Legend<br/>
+      <div id="legend" style="visibility: hidden;"></div>
+    </div>
+</div>
+
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="/dist/ChessGrapher.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script>
+	var evalAndTimeGraph = new CG.EvalAndTime('#eval-and-time-graph', {
+		playerPaneWidth: 200
+	});
+
+	// d3.json('/data/shamkir-gashimov-memorial-2015.json', function (error, data) {
+	// 	evalAndTimeGraph.update(CG.util.parseGameNotation(data[4]));
+	// });
+
+	var lol = new CG.HeatMap('#squtil', {
+			sideLength: 500
+		});
+
+	var hm;
+	d3.json('/data/a_statistics.json', function (error, data) {
+	// 	lol.setData(data.checkSquares);
+	// 	setTimeout(function () {
+	// 	lol.update();
+
+	// }, 000)
+		hm = data;
+	});
+
+	$('#kek').on('change', function () {
+		console.log($('#kek').val());
+		lol.setData(hm[$('#kek').val()])
+		lol.update()
+	})
+
+
+	// var kes = new CG.Openings();
+</script>
+</body>
+</html>

@@ -1,13 +1,13 @@
+/*eslint no-console: 0*/
+/*eslint no-unused-vars: 0*/
+
 'use strict';
 
 var debug = require('debug')('statistics');
 
 var Promise = require('bluebird');
 var colors = require('colors');
-
-var fs = require('fs');
-Promise.promisifyAll(fs);
-
+var fs = Promise.promisifyAll(require('fs'));
 var chess = require('chessli.js');
 
 var args = require('commander');

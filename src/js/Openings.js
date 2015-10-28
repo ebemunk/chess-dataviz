@@ -1,6 +1,6 @@
-import debug from 'debug';
+// import debug from 'debug';
 
-let dbg = debug('cv:Openings');
+// let dbg = debug('cv:Openings');
 
 export class Openings {
 	constructor(selector, options) {

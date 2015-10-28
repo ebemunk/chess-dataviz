@@ -1,8 +1,8 @@
 import merge from 'deepmerge';
-import debug from 'debug';
+// import debug from 'debug';
 import * as util from './util';
 
-let dbg = debug('cv:HeatMap');
+// let dbg = debug('cv:HeatMap');
 
 export class HeatMap {
 	constructor(selector, options, data) {
