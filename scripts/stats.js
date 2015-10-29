@@ -1,5 +1,5 @@
 /*eslint no-console: 0*/
-/*eslint no-unused-lets: 0*/
+/*eslint no-unused-vars: 0*/
 
 'use strict';
 
@@ -10,7 +10,7 @@ let fs = Promise.promisifyAll(require('fs'));
 let Chess = require('chess.js').Chess;
 let _ = require('lodash');
 
-let minimist = require('minimist')
+let minimist = require('minimist');
 let colors = require('colors');
 let pace = require('pace');
 
