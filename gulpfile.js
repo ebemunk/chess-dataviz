@@ -78,6 +78,6 @@ gulp.task('watch', ['serve'], function () {
 
 function errorHandler(err) {
 	/*eslint no-console: 0*/
-	console.log(err);
+	console.log(err.message);
 	this.emit('end');
 }
