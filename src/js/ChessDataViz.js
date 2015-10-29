@@ -3,11 +3,11 @@ import {EvalAndTime} from './EvalAndTime';
 import {HeatMap} from './HeatMap';
 import {Openings} from './Openings';
 
-export var ChessGrapher = {
+export var ChessDataViz = {
 	EvalAndTime,
 	HeatMap,
 	Openings,
 	util
 };
 
-window.CG = ChessGrapher;
+window.CG = ChessDataViz;

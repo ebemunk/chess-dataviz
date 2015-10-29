@@ -3,7 +3,7 @@
 import _ from 'lodash';
 import dbg from 'debug';
 
-var debug = dbg('cv:EvalAndTime');
+let debug = dbg('cdv:EvalAndTime');
 
 /*
 Plots evaluation & time usage for a game.

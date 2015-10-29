@@ -1,6 +1,6 @@
 <html>
 <head>
-<link href="/dist/ChessGrapher.css" rel="stylesheet">
+<link href="/dist/ChessDataViz.css" rel="stylesheet">
 <style>
 	body {
 		background-color: lightgray;
@@ -10,9 +10,9 @@
 </head>
 <body>
 
-<div id="eval-and-time-graph" class="cg-eval-time wrap"></div>
+<div id="eval-and-time-graph" class="cdv-eval-time wrap"></div>
 
-<div id="squtil" class="cg-heatmap"></div>
+<div id="squtil" class="cdv-heatmap"></div>
 <select id="kek">
 	<option value="squareUtilization">squtil</option>
 	<option value="moveSquares">moveSquares</option>
@@ -20,7 +20,7 @@
 	<option value="checkSquares">checkSquares</option>
 </select>
 
-<div id="ops" class="cg-openings">
+<div id="ops" class="cdv-openings">
     <div id="main">
       <div id="sequence"></div>
       <div id="chart">
@@ -37,7 +37,7 @@
 </div>
 
 <script src="http://d3js.org/d3.v3.min.js"></script>
-<script src="/dist/ChessGrapher.js"></script>
+<script src="/dist/ChessDataViz.js"></script>
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script>
 	var evalAndTimeGraph = new CG.EvalAndTime('#eval-and-time-graph', {
@@ -69,7 +69,7 @@
 	})
 
 
-	// var kes = new CG.Openings();
+	var kes = new CG.Openings();
 </script>
 </body>
 </html>

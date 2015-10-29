@@ -1,8 +1,11 @@
-import merge from 'deepmerge';
-// import debug from 'debug';
+/*global d3*/
+/*eslint no-unused-vars: 0*/
+
+import _ from 'lodash';
+import dbg from 'debug';
 import * as util from './util';
 
-// let dbg = debug('cv:HeatMap');
+let debug = dbg('cdv:HeatMap');
 
 export class HeatMap {
 	constructor(selector, options, data) {
@@ -30,7 +33,7 @@ export class HeatMap {
 
 		options = options || {};
 
-		this.options = merge(defaultOptions, options);
+		this.options = _.merge({}, defaultOptions, options);
 
 		//calculate some things to use later
 		this.options.totalSideLength = this.options.sideLength;
@@ -53,7 +56,7 @@ export class HeatMap {
 
 		//check if a square is white
 		function isWhite(d) {
-			return (! (d.x % 2) && ! (d.y % 2)) || (d.x % 2 && d.y % 2)
+			return (! (d.x % 2) && ! (d.y % 2)) || (d.x % 2 && d.y % 2);
 		}
 
 		//clear element
@@ -143,7 +146,7 @@ export class HeatMap {
 				.attr('cy', this.options.squareLength / 2)
 				.attr('class', self.options.accessor.color == 'w' ? 'white' : 'black')
 				.classed('color-toggle', true)
-				.on('click', function(d, i) {
+				.on('click', function(d) {
 					d3.select(this)
 						.attr('class', self.options.accessor.color == 'b' ? 'white' : 'black')
 						.classed('color-toggle', true)
@@ -212,11 +215,11 @@ export class HeatMap {
 				.attr('xlink:href', (d) => d.image)
 				.attr('class', 'piece')
 				.classed('selected', (d) => this.options.accessor.piece == d.piece)
-				.on('click', function(d, i) {
+				.on('click', function(d) {
 					self.container.select('.piece-selector').selectAll('.piece').classed('selected', false);
 					d3.select(this).classed('selected', true);
 					self.options.accessor.piece = d.piece;
-					self.update()
+					self.update();
 				})
 				.append('svg:title')
 					.text((d) => d.key)
@@ -254,7 +257,7 @@ export class HeatMap {
 				.attr('height', (d) => d + 'px')
 				.attr('transform', (d) => {
 					let halfWidth = d / 2;
-					return 'translate(-' + halfWidth + ',-' + halfWidth + ')'
+					return 'translate(-' + halfWidth + ',-' + halfWidth + ')';
 				})
 				.attr('class', 'heat-square')
 				.on('mouseover', function(d, i) {
@@ -282,7 +285,7 @@ export class HeatMap {
 			.attr('height', (d) => d + 'px')
 			.attr('transform', (d) => {
 				let halfWidth = d / 2;
-				return 'translate(-' + halfWidth + ',-' + halfWidth + ')'
+				return 'translate(-' + halfWidth + ',-' + halfWidth + ')';
 			})
 		;
 	}

@@ -22,17 +22,17 @@ var csswring = require('csswring');
 
 gulp.task('js', function () {
 	return browserify({
-		entries: './src/js/ChessGrapher.js',
+		entries: './src/js/ChessDataViz.js',
 		debug: true
 	})
 	// .add(require.resolve('babel/polyfill'))
 	.transform(babelify)
 	.bundle()
 		.on('error', errorHandler)
-	.pipe(source('ChessGrapher.js'))
+	.pipe(source('ChessDataViz.js'))
 	.pipe(buffer())
 	.pipe(gulp.dest('./dist/'))
-	.pipe(rename('ChessGrapher.min.js'))
+	.pipe(rename('ChessDataViz.min.js'))
 	.pipe(uglify())
 	.pipe(gulp.dest('./dist/'))
 	.pipe(browserSync.reload({stream:true}))
@@ -40,7 +40,7 @@ gulp.task('js', function () {
 });
 
 gulp.task('less', function () {
-	return gulp.src('./src/less/ChessGrapher.less')
+	return gulp.src('./src/less/ChessDataViz.less')
 		.pipe(plumber())
 		.pipe(sourcemaps.init({loadMaps: true}))
 		.pipe(less())
