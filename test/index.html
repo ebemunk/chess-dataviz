@@ -21,55 +21,45 @@
 </select>
 
 <div id="ops" class="cdv-openings">
-    <div id="main">
-      <div id="sequence"></div>
-      <div id="chart">
-        <div id="explanation" style="visibility: hidden;">
-          <span id="percentage"></span><br/>
-          of visits begin with this sequence of pages
-        </div>
-      </div>
-    </div>
-    <div id="sidebar">
-      <input type="checkbox" id="togglelegend"> Legend<br/>
-      <div id="legend" style="visibility: hidden;"></div>
-    </div>
 </div>
 
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="/dist/ChessDataViz.js"></script>
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script>
-	var evalAndTimeGraph = new CG.EvalAndTime('#eval-and-time-graph', {
-		playerPaneWidth: 200
-	});
+	// var evalAndTimeGraph = new CG.EvalAndTime('#eval-and-time-graph', {
+	// 	playerPaneWidth: 200
+	// });
 
 	// d3.json('/data/shamkir-gashimov-memorial-2015.json', function (error, data) {
 	// 	evalAndTimeGraph.update(CG.util.parseGameNotation(data[4]));
 	// });
 
-	var lol = new CG.HeatMap('#squtil', {
-			sideLength: 500
-		});
+	// var lol = new CG.HeatMap('#squtil', {
+	// 		sideLength: 500
+	// 	});
 
-	var hm;
-	d3.json('/data/a_statistics.json', function (error, data) {
+	// var hm;
+	d3.json('/data/games_statistics.json', function (error, data) {
 	// 	lol.setData(data.checkSquares);
 	// 	setTimeout(function () {
 	// 	lol.update();
+	var kes = new CG.Openings('#ops', {
+		arcThreshold: 0.01,
+		textThreshold: 0.15
+	}, data);
 
 	// }, 000)
-		hm = data;
+		// hm = data;
 	});
 
-	$('#kek').on('change', function () {
-		console.log($('#kek').val());
-		lol.setData(hm[$('#kek').val()])
-		lol.update()
-	})
+	// $('#kek').on('change', function () {
+	// 	console.log($('#kek').val());
+	// 	lol.setData(hm[$('#kek').val()])
+	// 	lol.update()
+	// })
 
 
-	var kes = new CG.Openings();
 </script>
 </body>
 </html>

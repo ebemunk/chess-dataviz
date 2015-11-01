@@ -1,49 +1,126 @@
-// import debug from 'debug';
+import debug from 'debug';
+import _ from 'lodash';
 
-// let dbg = debug('cv:Openings');
+let dbg = debug('cv:Openings');
 
 export class Openings {
-	constructor(selector, options) {
+	constructor(selector, options, data) {
+		let self = this;
 
+		if( ! selector ) throw Error('need dom selector');
 
+		let defaultOptions = {
+			width: 550,
+			height: 550,
+			colors: d3.scale.category10(),
+			arcThreshold: 0.01,
+			textThreshold: 0.1
+		};
 
+		options = options || {};
 
+		this.options = _.merge({}, defaultOptions, options);
+		this.container = d3.select(selector);
 
+		var radius = Math.min(this.options.width, this.options.height) / 2;
 
+		let root = this.container.append('svg')
+			.attr('width', this.options.width)
+			.attr('height', this.options.height)
+		;
 
+		let vis = root.append('g')
+			.attr('transform', 'translate(' + this.options.width / 2 + ',' + this.options.height / 2 + ')')
+		;
 
+		let partition = d3.layout.partition()
+			.size([2 * Math.PI, Math.pow(radius, 2)])
+			.value(d => d.count)
+		;
+
+		let arc = d3.svg.arc()
+			.startAngle(d => d.x)
+			.endAngle(d => d.x + d.dx)
+			.innerRadius(d => Math.sqrt(d.y))
+			.outerRadius(d => Math.sqrt(d.y + d.dy))
+		;
+
+		let nodes = partition.nodes(data).filter(d => d.dx > this.options.arcThreshold);
+
+		let path = vis.selectAll('.arc').data(nodes).enter()
+			.append('path')
+				.attr('display', d => d.depth ? null : 'none')
+				.attr('d', arc)
+				.attr('fill-rule', 'evenodd')
+				.attr('class', 'arc')
+				.style('fill', (d, i) => { 
+					if( i === 0 ) return;
+
+					var rootAncestor = getAncestors(d)[0];
+					var color = d3.hsl(this.options.colors(rootAncestor.san));
+
+					if( d.depth % 2 === 0 ) {
+						color = color.darker(0.5);
+					} else {
+						color = color.brighter(0.5);
+					}
+
+					color = color.darker(d.depth * 0.2);
+					return color; 
+				})
+		;
+
+		let text = vis.selectAll('.san').data(nodes).enter()
+			.append('text')
+				.attr('class', 'san')
+				.attr('transform', d => 'translate(' + arc.centroid(d) + ')')
+				.attr('dy', '6')
+				.attr('text-anchor', 'middle')
+				.text(d => {
+					if( d.dx < this.options.textThreshold ) return '';
+
+					return d.depth ? d.san : '';
+				})
+		;
+
+  // var text = vis.selectAll("text").data(nodes);
+  // var textEnter = text.enter().append("text")
+	 //  // .attr("x", (d) => d.x)
+	 //  .attr('transform', (d) => "translate(" + arc.centroid(d) + ")")
+	 //  .text(function(d) {
+		// var a = (d.dx) * 90 / Math.PI;
+		// if(a < 10) return '';
+		// return d.depth ? d.san : '';
+	 //  })
+	 //  .attr('text-anchor', 'middle')
+	 //  ;
 // Dimensions of sunburst.
-var width = 550;
-var height = 550;
-var radius = Math.min(width, height) / 2;
-
-// Breadcrumb dimensions: width, height, spacing, width of tip/tail.
-var b = {
-	w: 75, h: 30, s: 3, t: 10
-};
+// var width = 550;
+// var height = 550;
+// var radius = Math.min(width, height) / 2;
 
 // make `colors` an ordinal scale
-var colors = d3.scale.category20();
+// var colors = d3.scale.category10();
 
 // Total size of all segments; we set this later, after loading the data.
-var totalSize = 0; 
+// var totalSize = 0; 
 
-var vis = d3.select("#chart").append("svg:svg")
-		.attr("width", width)
-		.attr("height", height)
-		.append("svg:g")
-		.attr("id", "container")
-		.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+// var vis = d3.select("#ops").append("svg:svg")
+// 		.attr("width", width)
+// 		.attr("height", height)
+// 		.append("svg:g")
+// 		.attr("id", "container")
+// 		.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-var partition = d3.layout.partition()
-		.size([2 * Math.PI, radius * radius])
-		.value(function(d) { return d.size; });
+// var partition = d3.layout.partition()
+// 		.size([2 * Math.PI, radius * radius])
+// 		.value(function(d) { return d.count; });
 
-var arc = d3.svg.arc()
-		.startAngle(function(d) { return d.x; })
-		.endAngle(function(d) { return d.x + d.dx; })
-		.innerRadius(function(d) { return Math.sqrt(d.y); })
-		.outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
+// var arc = d3.svg.arc()
+// 		.startAngle(function(d) { return d.x; })
+// 		.endAngle(function(d) { return d.x + d.dx; })
+// 		.innerRadius(function(d) { return Math.sqrt(d.y); })
+// 		.outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
 
 // Use d3.csv.parseRows so that we do not need to have a header
 // row, and can receive the csv as an array of arrays.
@@ -51,11 +128,12 @@ var arc = d3.svg.arc()
 //var text = getText();
 //var csv = d3.csv.parseRows(text);
 //var json = buildHierarchy(csv);
-var json = getData();
-createVisualization(json);
+// var json = data;
+// var json = getData();
+// createVisualization(json);
 
 // Main function to draw and set up the visualization, once we have the data.
-function createVisualization(json) {
+// function createVisualization(json) {
 
 	// Basic setup of page elements.
 	// initializeBreadcrumbTrail();
@@ -64,61 +142,87 @@ function createVisualization(json) {
 
 	// Bounding circle underneath the sunburst, to make it easier to detect
 	// when the mouse leaves the parent g.
-	vis.append("svg:circle")
-			.attr("r", radius)
-			.style("opacity", 0);
+	// vis.append("svg:circle")
+	// 		.attr("r", radius)
+	// 		.style("opacity", 0);
 
 	// For efficiency, filter nodes to keep only those large enough to see.
-	var nodes = partition.nodes(json)
-			.filter(function(d) {
-			return (d.dx > 0.005); // 0.005 radians = 0.29 degrees
-			});
-		
-		var uniqueNames = (function(a) {
-				var output = [];
-				a.forEach(function(d) {
-						if (output.indexOf(d.name) === -1) {
-								output.push(d.name);
-						}
-				});
-				return output;
-		})(nodes);
+	// var nodes = partition.nodes(json)
+	// 		.filter(function(d) {
+	// 		// return (d.dx > 0.005); // 0.005 radians = 0.29 degrees
+	// 		return (d.dx > 0.010); // 0.005 radians = 0.29 degrees
+	// 		});
+	// 	console.log(json)
+	// 	console.log(nodes)
+
+  //           var aaaz = partition.nodes(getData())
+  //           .filter(function(d) {
+  //           return (d.dx > 0.005); // 0.005 radians = 0.29 degrees
+  //           });
+  //       console.log(getData())
+		// console.log(aaaz)
+		// var uniqueNames = (function(a) {
+		// 		var output = [];
+		// 		a.forEach(function(d) {
+		// 				if (output.indexOf(d.san) === -1) {
+		// 						output.push(d.san);
+		// 				}
+		// 		});
+		// 		return output;
+		// })(nodes);
 		
 	// set domain of colors scale based on data
-	colors.domain(uniqueNames);
+ //    var uniqueNames = _.uniq(nodes, 'san')
+ //    console.log(uniqueNames.length);
+	// colors.domain(uniqueNames);
 	
 	// make sure this is done after setting the domain
 	// drawLegend();
-				
 
-	var path = vis.data([json]).selectAll("path")
-			.data(nodes)
-			.enter().append("svg:path")
-			.attr("display", function(d) { return d.depth ? null : "none"; })
-			.attr("d", arc)
-			.attr("fill-rule", "evenodd")
-			.style("fill", function(d) { return colors(d.name); })
-			.style("opacity", 1)
-			// .on("mouseover", mouseover);
-  var text = vis.selectAll("text").data(nodes);
-  var textEnter = text.enter().append("text")
-      // .attr("x", (d) => d.x)
-      .attr('transform', (d) => "translate(" + arc.centroid(d) + ")")
-      .text(function(d) {
-      	var a = (d.dx) * 90 / Math.PI;
-      	console.log(a);
-      	if(a < 10) return '';
-      	return d.depth ? d.name : '';
-      })
-      .attr('text-anchor', 'middle')
-      ;
+// 	var path = vis.data([json]).selectAll("path")
+// 			.data(nodes)
+// 			.enter().append("svg:path")
+// 			.attr("display", function(d) { return d.depth ? null : "none"; })
+// 			.attr("d", arc)
+// 			.attr("fill-rule", "evenodd")
+// 			// .style("fill", function(d) { return colors(d.san); })
+// 			.style("fill", function(d,i) { 
+// 				// var ref = d.parent ? d.parent : d;
+// 				// console.log(ref.depth, ref.san, colors(ref.san));
+// 				if(d.san === 'ref') return;
+// 				var rrt = getAncestors(d);
+// console.log(d.san, rrt[0].san, i, ~~(i/d.depth))
+// var color = d3.hsl(colors(rrt[0].san));
+// if( d.depth % 2 === 0 ) {
+//    color = color.darker(0.5);
+// } else {
+//    color = color.brighter(0.5);
+// }
+// color = color.darker(d.depth * 0.2);
+// // var color = d3.hsl(colors(rrt[0].san)).darker(d.depth*0.3);
+// // var color = d3.hsl(colors(~~(i/d.depth))).darker(d.depth/5);
+// 				return color; 
+// 			})
+// 			.style("opacity", 1)
+// 			// .on("mouseover", mouseover);
+//   var text = vis.selectAll("text").data(nodes);
+//   var textEnter = text.enter().append("text")
+// 	  // .attr("x", (d) => d.x)
+// 	  .attr('transform', (d) => "translate(" + arc.centroid(d) + ")")
+// 	  .text(function(d) {
+// 		var a = (d.dx) * 90 / Math.PI;
+// 		if(a < 10) return '';
+// 		return d.depth ? d.san : '';
+// 	  })
+// 	  .attr('text-anchor', 'middle')
+// 	  ;
 
 	// Add the mouseleave handler to the bounding circle.
 	// d3.select("#container").on("mouseleave", mouseleave);
 
 	// Get total size of the tree = value of root node from partition.
 	// totalSize = path.node().__data__.value;
- };
+ // };
 
 // Fade all but the current sequence, and show it in the breadcrumb trail.
 // function mouseover(d) {
@@ -177,15 +281,15 @@ function createVisualization(json) {
 
 // Given a node in a partition layout, return an array of all of its ancestor
 // nodes, highest first, but excluding the root.
-// function getAncestors(node) {
-// 	var path = [];
-// 	var current = node;
-// 	while (current.parent) {
-// 		path.unshift(current);
-// 		current = current.parent;
-// 	}
-// 	return path;
-// }
+function getAncestors(node) {
+	var path = [];
+	var current = node;
+	while (current.parent) {
+		path.unshift(current);
+		current = current.parent;
+	}
+	return path;
+}
 
 // function initializeBreadcrumbTrail() {
 // 	// Add the svg area.
@@ -298,153 +402,6 @@ function createVisualization(json) {
 // 		legend.style("visibility", "hidden");
 // 	}
 // }
-
-function getData() {
-	return{
-    "name": "ref",
-    "children": [
-        {
-            "name": "june11",
-            "children": [
-                {
-                    "name": "atts",
-                    "children": [
-                        {
-                            "name": "early",
-                            "size": 11
-                        },
-                        {
-                            "name": "jcp",
-                            "size": 40
-                        },
-                        {
-                            "name": "jcpaft",
-                            "size": 50
-                        },
-                        {
-                            "name": "stillon",
-                            "size": 195
-                        },
-                        {
-                            "name": "jo",
-                            "children": [
-                                {
-                                    "name": "early",
-                                    "size": 100
-                                },
-                                {
-                                    "name": "jcp",
-                                    "size": 67
-                                },
-                                {
-                                    "name": "jcpaft",
-                                    "size": 110
-                                },
-                                {
-                                    "name": "stillon",
-                                    "size": 154
-                                },
-                                {
-                                    "name": "sus1",
-                                    "children": [
-                                        {
-                                            "name": "early",
-                                            "size": 11
-                                        },
-                                        {
-                                            "name": "jcp",
-                                            "size": 118
-                                        },
-                                        {
-                                            "name": "jcpaft",
-                                            "size": 39
-                                        },
-                                        {
-                                            "name": "stillon",
-                                            "size": 2779
-                                        }
-                                    ]
-                                },
-                                {
-                                    "name": "sus5",
-                                    "children": [
-                                        {
-                                            "name": "early",
-                                            "size": 0
-                                        },
-                                        {
-                                            "name": "jcp",
-                                            "size": 64
-                                        },
-                                        {
-                                            "name": "jcpaft",
-                                            "size": 410
-                                        },
-                                        {
-                                            "name": "stillon",
-                                            "size": 82
-                                        }
-                                    ]
-                                },
-                                {
-                                    "name": "sus9",
-                                    "children": [
-                                        {
-                                            "name": "early",
-                                            "size": 1018
-                                        },
-                                        {
-                                            "name": "jcp",
-                                            "size": 3458
-                                        },
-                                        {
-                                            "name": "jcpaft",
-                                            "size": 106
-                                        },
-                                        {
-                                            "name": "stillon",
-                                            "size": 243
-                                        }
-                                    ]
-                                },
-                                {
-                                    "name": "sus13",
-                                    "children": [
-                                        {
-                                            "name": "early",
-                                            "size": 110
-                                        },
-                                        {
-                                            "name": "jcp",
-                                            "size": 190
-                                        },
-                                        {
-                                            "name": "jcpaft",
-                                            "size": 80
-                                        },
-                                        {
-                                            "name": "stillon",
-                                            "size": 9190
-                                        },
-                                        {
-                                            "name": "allsus",
-                                            "size": 3970
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "name": "noatt",
-                    "size": 30
-                }
-            ]
-        }
-    ]
-}
-};
 
 
 
