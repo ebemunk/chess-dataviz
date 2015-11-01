@@ -40,6 +40,7 @@ function* processPGNFile(filename) {
 	let bar = pace(games.length);
 	let chessGame = new Chess();
 	var heatmap = new Heatmap();
+	var openings = new Openings();
 
 	games.map(part => {
 		chessGame.reset();
@@ -47,11 +48,42 @@ function* processPGNFile(filename) {
 		let moves = chessGame.history({verbose: true});
 
 		heatmap.update(moves);
+		openings.update(_.take(moves, 10));
 
 		bar.op();
 	});
 
-	return heatmap;
+	return openings;
+}
+
+class Openings {
+	constructor() {
+		this.data = {
+			san: 'root',
+			children: []
+		};
+	}
+
+	update(moves) {
+		let ref = this.data.children;
+
+		moves.forEach(move => {
+			var child = _.find(ref, {san: move.san});
+			if( child ) {
+				child.count++;
+			} else {
+				child = {
+					san: move.san,
+					count: 1,
+					children: []
+				};
+
+				ref.push(child);
+			}
+
+			ref = child.children;
+		});
+	}
 }
 
 class Heatmap {
@@ -126,4 +158,28 @@ class Heatmap {
 			this.data.checkSquares[move.toIndex].all[move.color]++;
 		}
 	}
+
+	// function squareOccupancy (game, boardHeatmap) {
+	// 	var chessGame = new chess.Chess();
+	// 	var files = 'abcdefgh';
+
+	// 	game.notation.forEach(function (move) {
+	// 		var theMove = chessGame.move(move.move);
+	// 		for( let file = 0; file < 8; file++ ) {
+	// 			for( let rank = 1; rank < 9; rank++ ) {
+	// 				let squareName = files.charAt(file) + rank;
+
+	// 				if( theMove.from === squareName ) continue;
+
+	// 				let square = chessGame.get(squareName);
+
+	// 				if( ! square ) continue;
+
+	// 				var squareIndex = squareToIndex(squareName);
+	// 				boardHeatmap[squareIndex[1] * 8 + squareIndex[0]][square.type][square.color]++;
+	// 				boardHeatmap[squareIndex[1] * 8 + squareIndex[0]].all[square.color]++;
+	// 			}
+	// 		}
+	// 	});
+	// }
 }
