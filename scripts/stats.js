@@ -26,8 +26,11 @@ let argv = minimist(process.argv.slice(2), {
 debug('  source file'.cyan, argv.file);
 
 Promise.coroutine(processPGNFile)(argv.file)
-.then(function (heatmap) {
-	return fs.writeFileAsync(argv.file.split('.pgn')[0] + '_statistics.json', JSON.stringify(heatmap.data, null, 4));
+.spread(function (heatmaps, openings) {
+	return fs.writeFileAsync(argv.file.split('.pgn')[0] + '_statistics.json', JSON.stringify({
+		heatmaps: heatmaps.data,
+		openings: openings.data
+	}, null, 4));
 })
 .then(function () {
 	console.log('  all good'.green);
@@ -39,7 +42,7 @@ function* processPGNFile(filename) {
 	let games = file.split(/\r?\n\r?\n(?=\[)/g);
 	let bar = pace(games.length);
 	let chessGame = new Chess();
-	var heatmap = new Heatmap();
+	var heatmaps = new Heatmaps();
 	var openings = new Openings();
 
 	games.map(part => {
@@ -47,19 +50,19 @@ function* processPGNFile(filename) {
 		chessGame.load_pgn(part);
 		let moves = chessGame.history({verbose: true});
 
-		heatmap.update(moves);
+		heatmaps.update(moves);
 		openings.update(_.take(moves, 10));
 
 		bar.op();
 	});
 
-	return openings;
+	return [heatmaps, openings];
 }
 
 class Openings {
 	constructor() {
 		this.data = {
-			san: 'root',
+			san: 'start',
 			children: []
 		};
 	}
@@ -86,7 +89,7 @@ class Openings {
 	}
 }
 
-class Heatmap {
+class Heatmaps {
 	constructor() {
 		this.counters = [
 			'squareUtilization',
