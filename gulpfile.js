@@ -25,8 +25,9 @@ gulp.task('js', function () {
 		entries: './src/js/ChessDataViz.js',
 		debug: true
 	})
-	// .add(require.resolve('babel/polyfill'))
-	.transform(babelify)
+	.transform(babelify.configure({
+		presets: ['es2015']
+	}))
 	.bundle()
 		.on('error', errorHandler)
 	.pipe(source('ChessDataViz.js'))
