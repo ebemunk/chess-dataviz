@@ -1,3 +1,5 @@
+/*global d3*/
+
 import dbg from 'debug';
 import _ from 'lodash';
 
@@ -5,8 +7,6 @@ let debug = dbg('cv:Openings');
 
 export class Openings {
 	constructor(selector, options, data) {
-		let self = this;
-
 		if( ! selector ) throw Error('need dom selector');
 
 		let defaultOptions = {
@@ -20,7 +20,6 @@ export class Openings {
 		options = options || {};
 
 		this.options = _.merge({}, defaultOptions, options);
-		this.container = d3.select(selector);
 		this.dispatch = d3.dispatch('mouseenter', 'mouseleave');
 
 		debug('constructor', this.options);
@@ -40,7 +39,7 @@ export class Openings {
 			.range([0, radius])
 		;
 
-		this.root = this.container.append('svg')
+		this.root = d3.select(selector).append('svg')
 			.attr('width', this.options.width)
 			.attr('height', this.options.height)
 				.append('g')
@@ -74,7 +73,7 @@ export class Openings {
 				.attr('d', this.arc)
 				.attr('fill-rule', 'evenodd')
 				.attr('class', 'arc')
-				.each(function(d) {
+				.each(function() {
 					this.x0 = 0;
 					this.dx0 = 0;
 				})
@@ -100,13 +99,13 @@ export class Openings {
 				let parents = this.getParents(d);
 
 				arcs.style('opacity', 0.3);
-				arcs.filter(node => {return parents.indexOf(node) > -1})
+				arcs.filter(node => parents.indexOf(node) > -1)
 				.style('opacity', 1);
 
 				let count = d.count || 0;
 
-				this.percentageText.text(percentageFormat(d.count / totalCount));
-				this.countText.text(d.count + ' games');
+				this.percentageText.text(percentageFormat(count / totalCount));
+				this.countText.text(count + ' games');
 
 				let moves = _.pluck(parents, 'san');
 				this.dispatch.mouseenter(d, i, moves);
@@ -129,7 +128,7 @@ export class Openings {
 					return function(t) {
 						var b = interpolate(t);
 						return self.arc(b);
-					}
+					};
 				})
 		;
 
