@@ -13,6 +13,7 @@
     "colors": "^1.1.2",
     "debug": "^2.2.0",
     "event-stream": "^3.3.2",
+    "highland": "^2.5.1",
     "lodash": "^3.10.1",
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
