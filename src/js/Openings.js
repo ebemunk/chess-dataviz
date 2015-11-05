@@ -83,7 +83,7 @@ export class Openings {
 			.style('fill', (d, i) => { 
 				if( i === 0 ) return;
 
-				let rootParent = this.getParents(d)[0];
+				let rootParent = getParents(d)[0];
 				let color = d3.hsl(this.options.colors(rootParent.san));
 
 				if( d.depth % 2 === 0 ) {
@@ -96,7 +96,7 @@ export class Openings {
 				return color; 
 			})
 			.on('mouseenter', (d, i) => {
-				let parents = this.getParents(d);
+				let parents = getParents(d);
 
 				arcs.style('opacity', 0.3);
 				arcs.filter(node => parents.indexOf(node) > -1)
@@ -172,15 +172,15 @@ export class Openings {
 			;
 		}
 	}
+}
 
-	getParents(node) {
-		let path = [];
-		let current = node;
-		while( current.parent ) {
-			path.unshift(current);
-			current = current.parent;
-		}
-
-		return path;
+function getParents(node) {
+	let path = [];
+	let current = node;
+	while( current.parent ) {
+		path.unshift(current);
+		current = current.parent;
 	}
+
+	return path;
 }
