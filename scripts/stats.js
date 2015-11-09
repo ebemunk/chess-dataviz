@@ -25,11 +25,13 @@ let argv = minimist(process.argv.slice(2), {
 
 let Openings = require('./lib/Openings.js');
 let Heatmaps = require('./lib/Heatmaps.js');
+let Moves = require('./lib/Moves.js');
 
 console.log('  source file'.cyan, argv.file);
 
 let heatmaps = new Heatmaps();
 let openings = new Openings();
+let movesz = new Moves();
 
 let start = new Date();
 
@@ -53,11 +55,13 @@ highland(fs.createReadStream(argv.file, {encoding: 'utf8'}))
 
 	heatmaps.update(moves);
 	openings.update(_.take(moves, 10));
+	movesz.update(moves);
 })
 .done(() => {
 	fs.writeFileAsync(argv.file.split('.pgn')[0] + '_statistics.json', JSON.stringify({
 		heatmaps: heatmaps.data,
-		openings: openings.data
+		openings: openings.data,
+		moves: movesz.survivalData
 	}, null, 4))
 	.then(() => {
 		console.log('  done, took'.cyan, new Date().getTime() - start.getTime(), 'ms'.cyan);
