@@ -2,10 +2,10 @@
 /*eslint no-unused-vars: 0*/
 
 import _ from 'lodash';
-import dbg from 'debug';
+import debug from 'debug';
 import * as util from './util';
 
-let debug = dbg('cdv:HeatMap');
+let log = debug('cdv:HeatMap');
 
 export class HeatMap {
 	constructor(selector, options, data) {
@@ -13,16 +13,14 @@ export class HeatMap {
 
 		if( ! selector ) throw Error('need dom selector');
 
-		this.data = data;
+		this._data = data;
 
 		//container setup
-		this.selector = selector;
-
 		this.container = d3.select(selector);
 
 		//options
 		let defaultOptions = {
-			sideLength: 500,
+			width: 500,
 			margin: 20,
 			interactive: true,
 			accessor: {
@@ -32,48 +30,34 @@ export class HeatMap {
 		};
 
 		options = options || {};
+		this._options = _.merge({}, defaultOptions, options);
 
-		this.options = _.merge({}, defaultOptions, options);
-
-		//calculate some things to use later
-		this.options.totalSideLength = this.options.sideLength;
-		this.options.sideLength = this.options.sideLength - this.options.margin * 2;
-		this.options.squareLength = Math.floor(this.options.sideLength / 8);
+		this._options.boardWidth = this._options.width - this._options.margin * 2;
+		this._options.squareWidth = Math.floor(this._options.boardWidth / 8);
 
 		//scale
 		this.scale = d3.scale.linear()
-			.range([0, this.options.squareLength])
+			.range([0, this._options.squareWidth])
 		;
-
-		//board squares
-		let board = [];
-		for( let i = 0; i < 64; i++ ) {
-			board.push({
-				x: i % 8,
-				y: Math.floor(i / 8)
-			});
-		}
-
-		//check if a square is white
-		function isWhite(d) {
-			return (! (d.x % 2) && ! (d.y % 2)) || (d.x % 2 && d.y % 2);
-		}
 
 		//clear element
 		this.container.selectAll('*').remove();
 
 		//root svg
 		let root = this.container.append('svg')
-			.attr('width', this.options.totalSideLength + 'px')
-			.attr('height', this.options.totalSideLength + this.options.squareLength + 'px')
+			.attr('width', this._options.width + 'px')
+			.attr('height', this._options.width + 'px')
 			.attr('class', 'graph')
 		;
 
 		//margins applied
 		let svg = root.append('g')
-			.attr('transform', 'translate(' + this.options.margin + ',' + this.options.margin + ')')
+			.attr('transform', 'translate(' + this._options.margin + ',' + this._options.margin + ')')
 			.attr('class', 'board')
 		;
+
+		//board squares
+		let board = util.boardSquares();
 
 		//create the g elements for squares
 		let squares = svg.selectAll('.square').data(board).enter()
@@ -84,42 +68,42 @@ export class HeatMap {
 
 					return 'square ' + file + rank;
 				})
-				.classed('white', (d) => isWhite(d))
-				.classed('black', (d) => ! isWhite(d))
+				.classed('white', (d) => util.isWhite(d))
+				.classed('black', (d) => ! util.isWhite(d))
 		;
 
 		//create square elements for board squares
 		squares.append('rect')
-			.attr('x', (d) => d.x * this.options.squareLength)
-			.attr('y', (d) => d.y * this.options.squareLength)
-			.attr('width', this.options.squareLength + 'px')
-			.attr('height', this.options.squareLength + 'px')
+			.attr('x', (d) => d.x * this._options.squareWidth)
+			.attr('y', (d) => d.y * this._options.squareWidth)
+			.attr('width', this._options.squareWidth + 'px')
+			.attr('height', this._options.squareWidth + 'px')
+			.attr('class', 'sq')
 		;
 
-		//a-h labels for files
-		let files = d3.range(8).map((i) => String.fromCharCode(97 + i));
 		//labels among the A file
 		let fileLabels = d3.range(8).map((i) => '.a' + (i + 1));
 
 		//file labels
 		svg.selectAll(fileLabels)
 			.append('text')
-				.attr('x', (d) => d.x * this.options.squareLength)
-				.attr('y', (d) => d.y * this.options.squareLength)
+				.attr('x', (d) => d.x * this._options.squareWidth)
+				.attr('y', (d) => d.y * this._options.squareWidth)
 				.attr('dx', '0.2em')
 				.attr('dy', '1em')
 				.text((d) => 8 - d.y)
 				.attr('class', 'label')
 		;
 
-		//labels for 1st rank
+		//a-h labels for files
+		let files = d3.range(8).map((i) => String.fromCharCode(97 + i));
 		let rankLabels = files.slice().map((file) => '.' + file + '1');
 
 		//rank labels
 		svg.selectAll(rankLabels)
 			.append('text')
-				.attr('x', (d) => (d.x + 1) * this.options.squareLength)
-				.attr('y', (d) => (d.y + 1) * this.options.squareLength)
+				.attr('x', (d) => (d.x + 1) * this._options.squareWidth)
+				.attr('y', (d) => (d.y + 1) * this._options.squareWidth)
 				.attr('dx', '-0.3em')
 				.attr('dy', '-0.5em')
 				.attr('text-anchor', 'end')
@@ -132,117 +116,38 @@ export class HeatMap {
 			.attr('class', 'data-container')
 		;
 
-		//piece selector container
-		root.append('g')
-			.attr('class', 'piece-selector')
-			.attr('transform', 'translate(' + this.options.margin + ',' + (this.options.margin + this.options.sideLength) + ')')
-		;
-
-		//color toggle piece selector
-		this.container.select('.piece-selector')
-			.append('circle')
-				.attr('r', this.options.squareLength / 2)
-				.attr('cx', this.options.squareLength / 2)
-				.attr('cy', this.options.squareLength / 2)
-				.attr('class', self.options.accessor.color == 'w' ? 'white' : 'black')
-				.classed('color-toggle', true)
-				.on('click', function(d) {
-					d3.select(this)
-						.attr('class', self.options.accessor.color == 'b' ? 'white' : 'black')
-						.classed('color-toggle', true)
-					;
-					self.options.accessor.color = (self.options.accessor.color == 'b' ? 'w' : 'b');
-					self.updatePieceSelectors();
-					self.update();
-				})
-			.append('svg:title')
-					.text('Switch Color')
-		;
-
 		//tooltip element
-		this.tooltip = this.container
-			.append('div')
-				.attr('class', 'tooltip')
+		this.tooltip = this.container.append('div')
+			.attr('class', 'tooltip')
 		;
-
-		this.updatePieceSelectors();
 	}
 
-	updatePieceSelectors() {
-		let self = this;
+	data(data) {
+		this._data = data;
 
-		var pieceTitles = {
-			all: 'All',
-			k: 'King',
-			q: 'Queen',
-			r: 'Rook',
-			b: 'Bishop',
-			n: 'Knight',
-			p: 'Pawn'
-		};
-
-		var colors = {
-			b: 'Black',
-			w: 'White'
-		};
-
-		//construct individual piece elements
-		let pieces = [{
-			piece: 'all',
-			image: util.pieces.all,
-			key: pieceTitles.all
-		}];
-
-		for( let key in util.pieces[this.options.accessor.color] ) {
-			pieces.push({
-				piece: key,
-				image: util.pieces[this.options.accessor.color][key],
-				key: colors[this.options.accessor.color] + ' ' + pieceTitles[key]
-			});
-		}
-
-		//create the selector pieces
-		let selectors = this.container.select('.piece-selector')
-			.selectAll('.piece').data(pieces, (d) => d.key)
-		;
-
-		//enter
-		selectors.enter()
-			.append('image')
-				.attr('width', this.options.squareLength)
-				.attr('height', this.options.squareLength)
-				.attr('x', (d, i) => (this.options.squareLength) * (i + 1))
-				.attr('xlink:href', (d) => d.image)
-				.attr('class', 'piece')
-				.classed('selected', (d) => this.options.accessor.piece == d.piece)
-				.on('click', function(d) {
-					self.container.select('.piece-selector').selectAll('.piece').classed('selected', false);
-					d3.select(this).classed('selected', true);
-					self.options.accessor.piece = d.piece;
-					self.update();
-				})
-				.append('svg:title')
-					.text((d) => d.key)
-		;
-
-		//exit
-		selectors.exit().remove();
+		this.update();
 	}
 
-	setData(data) {
-		this.data = data;
+	options(options) {
+		_.merge(this._options, options);
+
+		this.update();
 	}
 
 	update() {
 		let self = this;
 
+		if( ! this._options.interactive ) {
+			this.tooltip.classed('visible', false);
+		}
+
 		//set domain
 		this.scale.domain(
-			d3.extent(this.data, (d) => d[this.options.accessor.piece][this.options.accessor.color])
+			d3.extent(this._data, (d) => d[this._options.accessor.piece][this._options.accessor.color])
 		);
 
 		//extract relevant data
-		let data = this.data.map((d) => this.scale(d[this.options.accessor.piece][this.options.accessor.color]));
+		let data = this._data.map((d) => this.scale(d[this._options.accessor.piece][this._options.accessor.color]));
 
 		let heatSquares = this.dataContainer
 			.selectAll('.heat-square').data(data)
@@ -251,8 +156,8 @@ export class HeatMap {
 		//enter
 		heatSquares.enter()
 			.append('rect')
-				.attr('x', (d, i) => (i % 8 * this.options.squareLength) + (this.options.squareLength / 2))
-				.attr('y', (d, i) => (Math.floor(i / 8) * this.options.squareLength) + (this.options.squareLength / 2))
+				.attr('x', (d, i) => (i % 8 * this._options.squareWidth) + (this._options.squareWidth / 2))
+				.attr('y', (d, i) => (Math.floor(i / 8) * this._options.squareWidth) + (this._options.squareWidth / 2))
 				.attr('width', (d) => d + 'px')
 				.attr('height', (d) => d + 'px')
 				.attr('transform', (d) => {
@@ -261,20 +166,26 @@ export class HeatMap {
 				})
 				.attr('class', 'heat-square')
 				.on('mouseover', function(d, i) {
+					if( ! self._options.interactive ) return;
+
 					self.tooltip
-						.html(self.data[i][self.options.accessor.piece][self.options.accessor.color])
+						.html(self._data[i][self._options.accessor.piece][self._options.accessor.color])
 						.style('left', (d3.event.pageX) + 'px')
 						.style('top', (d3.event.pageY - 28) + 'px')
 						.classed('visible', true)
 					;
 				})
 				.on('mousemove', function (d) {
+					if( ! self._options.interactive ) return;
+
 					self.tooltip
 						.style('left', (d3.event.pageX) + 'px')
 						.style('top', (d3.event.pageY - 28) + 'px')
 					;
 				})
 				.on('mouseout', function(d) {
+					if( ! self._options.interactive ) return;
+
 					self.tooltip.classed('visible', false);
 				})
 		;
