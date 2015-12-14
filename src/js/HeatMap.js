@@ -13,8 +13,6 @@ export class HeatMap {
 
 		if( ! selector ) throw Error('need dom selector');
 
-		this._data = data;
-
 		//container setup
 		this.container = d3.select(selector);
 
@@ -120,6 +118,12 @@ export class HeatMap {
 		this.tooltip = this.container.append('div')
 			.attr('class', 'tooltip')
 		;
+
+		if( data ) {
+			this._data = data;
+
+			this.update();
+		}
 	}
 
 	data(data) {
