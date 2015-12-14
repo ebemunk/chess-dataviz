@@ -1,9 +1,9 @@
 /*global d3*/
 
-import dbg from 'debug';
+import debug from 'debug';
 import _ from 'lodash';
 
-let debug = dbg('cv:Openings');
+let log = debug('cv:Openings');
 
 export class Openings {
 	constructor(selector, options, data) {
@@ -22,7 +22,7 @@ export class Openings {
 		this.options = _.merge({}, defaultOptions, options);
 		this.dispatch = d3.dispatch('mouseenter', 'mouseleave');
 
-		debug('constructor', this.options);
+		log('constructor', this.options);
 
 		this.partition = d3.layout.partition()
 			.sort(null)
@@ -57,7 +57,7 @@ export class Openings {
 	}
 
 	update(data) {
-		debug('update');
+		log('update');
 
 		let self = this;
 
