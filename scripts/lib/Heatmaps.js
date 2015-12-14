@@ -40,17 +40,109 @@ class Heatmaps {
 
 			let fromTo = move.split(/[x\-]/);
 
-			let parsedMove = {
-				from: this.squareToIndex(fromTo[0]),
-				to: this.squareToIndex(fromTo[1]),
-				piece: piece,
-				color: i % 2 === 0 ? 'w' : 'b',
-				capture: /x/.test(move),
-				check: /\+/.test(move)
-			};
+			//an array in case of castling its K and R move
+			let parsedMoves = [];
+
+
+			//O-O white
+			if( /e1-g1/.test(move) ) {
+				parsedMoves.push({
+					from: this.squareToIndex('e1'),
+					to: this.squareToIndex('g1'),
+					piece: 'k',
+					color: 'w',
+					capture: false,
+					check: /\+/.test(move)
+				});
+
+				parsedMoves.push({
+					from: this.squareToIndex('h1'),
+					to: this.squareToIndex('f1'),
+					piece: 'r',
+					color: 'w',
+					capture: false,
+					check: /\+/.test(move)
+				});
+			}
+
+			//O-O-O white
+			else if( /e1-c1/.test(move) ) {
+				parsedMoves.push({
+					from: this.squareToIndex('e1'),
+					to: this.squareToIndex('c1'),
+					piece: 'k',
+					color: 'w',
+					capture: false,
+					check: /\+/.test(move)
+				});
+
+				parsedMoves.push({
+					from: this.squareToIndex('a1'),
+					to: this.squareToIndex('d1'),
+					piece: 'r',
+					color: 'w',
+					capture: false,
+					check: /\+/.test(move)
+				});
+			}
+
+			//O-O black
+			else if( /e8-g8/.test(move) ) {
+				parsedMoves.push({
+					from: this.squareToIndex('e8'),
+					to: this.squareToIndex('g8'),
+					piece: 'k',
+					color: 'b',
+					capture: false,
+					check: /\+/.test(move)
+				});
+
+				parsedMoves.push({
+					from: this.squareToIndex('h8'),
+					to: this.squareToIndex('f8'),
+					piece: 'r',
+					color: 'b',
+					capture: false,
+					check: /\+/.test(move)
+				});
+			}
+
+			//O-O-O black
+			else if( /e8-c8/.test(move) ) {
+				parsedMoves.push({
+					from: this.squareToIndex('e8'),
+					to: this.squareToIndex('c8'),
+					piece: 'k',
+					color: 'b',
+					capture: false,
+					check: /\+/.test(move)
+				});
+
+				parsedMoves.push({
+					from: this.squareToIndex('a8'),
+					to: this.squareToIndex('d8'),
+					piece: 'r',
+					color: 'b',
+					capture: false,
+					check: /\+/.test(move)
+				});
+			}
+
+			else {
+				parsedMoves.push({
+					from: this.squareToIndex(fromTo[0]),
+					to: this.squareToIndex(fromTo[1]),
+					piece: piece,
+					color: i % 2 === 0 ? 'w' : 'b',
+					capture: /x/.test(move),
+					check: /\+/.test(move)
+				});
+			}
 
 			this.counters.forEach(counter => {
-				this[counter](parsedMove);
+				parsedMoves.forEach(parsedMove => {
+					this[counter](parsedMove);
+				});
 			});
 		});
 	}
