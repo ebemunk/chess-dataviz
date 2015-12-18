@@ -5,7 +5,7 @@ const _ = require('lodash');
 function parseMove(move, i) {
 	let check = /\+/.test(move);
 
-	move = move.replace(/\+/g, '');
+	move = move.replace(/\+/g, '').replace(/#/g, '');
 
 	let piece = (/[NBRQK]/.test(move[0]) ? move[0] : 'P').toLowerCase();
 	let fromName = move.split(/[x\-]/)[0];
