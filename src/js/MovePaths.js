@@ -114,12 +114,7 @@ export class MovePaths {
 			.attr('class', 'data-container')
 		;
 
-		//tooltip element
-		this.tooltip = this.container.append('div')
-			.attr('class', 'tooltip')
-		;
-
-		this._data = _.pairs(data.Bc1);
+		this._data = _.pairs(data.e7);
 
 		let kk = [];
 
@@ -130,84 +125,15 @@ export class MovePaths {
 				kk.push([d[0], 1]);
 		});
 
-		this.scale = d3.scale.log()
-			.range([0.1, 1])
-		;
-
-		this.scale.domain(
-			d3.extent(this._data, (d) => {
-				return d[1];
-			})
-		);
-
-		this.scale1 = d3.scale.linear()
-			.range([1, 20])
-		;
-
-		this.scale1.domain(
-			d3.extent(this._data, (d) => {
-				return d[1];
-			})
-		);
-
-		var d1 = d3.svg.diagonal()
-			.source((d) => {
-				let square = d[0].split('-')[0].toLowerCase();
-
-				let file = square.charCodeAt(0) - 97;
-				let rank = 8 - square[1];
-
-
-				let x = (file * this._options.squareWidth) + (this._options.squareWidth / 2);
-				let y = (rank * this._options.squareWidth) + (this._options.squareWidth / 2);
-
-				x += _.random(-7, 7, true);
-				y += _.random(-7, 7, true);
-				// log(square)
-				// log(file, rank);
-				// log(x, y);
-				// log('-------------')
-				return {x: x, y: y};
-			})
-			.target((d) => {
-				let square = d[0].split('-')[1].toLowerCase();
-
-				let file = square.charCodeAt(0) - 97;
-				let rank = 8 - square[1];
-
-
-				let x = (file * this._options.squareWidth) + (this._options.squareWidth / 2);
-				let y = (rank * this._options.squareWidth) + (this._options.squareWidth / 2);
-
-				x += _.random(-7, 7, true);
-				y += _.random(-7, 7, true);
-				// log(square)
-				// log(file, rank);
-				// log(x, y);
-				// log('-------------')
-				return {x: x, y: y};
-			})
-
-			;
-
-		this.dataContainer.selectAll('.faf').data(kk)
-		.enter().append("path")
-			// .attr("stroke", "red")
-			// .attr("fill", "transparent")
-			// .attr('stroke-width', '1')
-			// .attr('stroke-opacity', 0.1)
-			// .attr("stroke-width", d => this.scale1(d[1]))
-			// .attr('stroke-opacity', d => this.scale(d[1]))
-			// .attr('d', d1)
-			.attr('class', 'faf')
-			.attr("d", d => {
+		this.dataContainer.selectAll('.move-path').data(kk)
+		.enter().append('path')
+			.attr('class', 'move-path')
+			.attr('d', d => {
 				function gs(d, s) {
-
 					let square = d[0].split('-')[s].toLowerCase();
 
 					let file = square.charCodeAt(0) - 97;
 					let rank = 8 - square[1];
-
 
 					let x = (file * self._options.squareWidth) + (self._options.squareWidth / 2);
 					let y = (rank * self._options.squareWidth) + (self._options.squareWidth / 2);
@@ -234,7 +160,26 @@ export class MovePaths {
 
 				let ctrp;
 
-				if( e.x > s.x ) {
+				let angle = Math.atan2(e.y-s.y, e.x-s.x);
+				let ng = angle * (180/Math.PI);
+				ng *= -1;
+
+				let op;
+
+				if( e.y < s.y ) {
+					if( e.x < s.x ) {
+						op = -1;
+					} else {
+						op = 1;
+					}
+				} else {
+					if( e.x < s.x ) {
+						op = -1;
+					} else {
+						op = 1;
+					}
+				}
+				if( op > 0 ) {
 					ctrp = {
 						x: e.x - orth.x,
 						y: e.y - orth.y
@@ -246,25 +191,18 @@ export class MovePaths {
 					};
 				}
 
-				let dv = 7;
-				let de = 2
-				s.x += _.random(-de, de, true)
-				s.y += _.random(-de, de, true)
-				e.x += _.random(-de, de, true)
-				e.y += _.random(-de, de, true)
-				ctrp.x += _.random(-dv, dv, true)
-				ctrp.y += _.random(-dv, dv, true)
+				let pointRandomizer = d3.random.normal(3, 2);
+				let bezierRandomizer = d3.random.normal(10, 3);
+
+				// s.x += pointRandomizer();
+				// s.y += pointRandomizer();
+				e.x += pointRandomizer();
+				e.y += pointRandomizer();
+				ctrp.x += bezierRandomizer();
+				ctrp.y += bezierRandomizer();
 
 				let str = `M${s.x},${s.y}, Q${ctrp.x},${ctrp.y} ${e.x},${e.y}`
-				// log(d)
-				// log(s, e, str)
 				return str;
 			});
-
-		// this.dataContainer.append('path')
-		// .attr('stroke', 'red')
-		// .attr('fill', 'transparent')
-		// .attr('stroke-width', '10')
-		// .attr('d', 'M100,300 Q500,150 500,300')
 	}
 }
