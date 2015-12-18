@@ -20,11 +20,10 @@ export class MovePaths {
 		let defaultOptions = {
 			width: 500,
 			margin: 20,
-			interactive: true,
-			accessor: {
-				piece: 'all',
-				color: 'w'
-			}
+			accessor: 'Nb1',
+			binSize: 1,
+			pointRandomizer: d3.random.normal(3, 1),
+			bezierRandomizer: d3.random.normal(12, 4)
 		};
 
 		options = options || {};
@@ -114,95 +113,115 @@ export class MovePaths {
 			.attr('class', 'data-container')
 		;
 
-		this._data = _.pairs(data.e7);
+		if( data ) {
+			this._data = data;
 
-		let kk = [];
+			this.update();
+		}
+	}
 
-		this._data.forEach(d => {
-			let div = d[1] / 3;
+	data(data) {
+		this._data = data;
 
-			for(let i=0; i<div; i++)
-				kk.push([d[0], 1]);
+		this.update();
+	}
+
+	options(options) {
+		_.merge(this._options, options);
+
+		this.update();
+	}
+
+	update() {
+		let self = this;
+		let data = [];
+
+		_.pairs(this._data[this._options.accessor]).forEach(d => {
+			let bin = Math.ceil(d[1] / this._options.binSize);
+
+			for( let i = 0; i < bin; i++ ) {
+				data.push(d[0]);
+			}
 		});
 
-		this.dataContainer.selectAll('.move-path').data(kk)
+		this.dataContainer.selectAll('.move-path').remove();
+
+		this.dataContainer.selectAll('.move-path').data(data)
 		.enter().append('path')
 			.attr('class', 'move-path')
 			.attr('d', d => {
-				function gs(d, s) {
-					let square = d[0].split('-')[s].toLowerCase();
+				//start and end points
+				let [s, e] = getSquareCoords(d);
 
-					let file = square.charCodeAt(0) - 97;
-					let rank = 8 - square[1];
-
-					let x = (file * self._options.squareWidth) + (self._options.squareWidth / 2);
-					let y = (rank * self._options.squareWidth) + (self._options.squareWidth / 2);
-
-					return {x,y};
-				}
-
-				let s = gs(d, 0);
-				let e = gs(d, 1);
-
-				let orth = {
+				//the orthogonal vector for vector [s, e]
+				//used for the bezier control point
+				let orthogonal = {
 					x: -(e.y - s.y),
 					y: e.x - s.x
 				};
 
-				let norm = Math.sqrt(Math.pow(orth.x, 2) + Math.pow(orth.y, 2));
-				let n1 = Math.sqrt(Math.pow(e.x-s.x, 2) + Math.pow(e.y-s.y, 2)) / 2;
+				//get norm (magnitude) of orthogonal
+				let norm = Math.sqrt(Math.pow(orthogonal.x, 2) + Math.pow(orthogonal.y, 2));
+				//scale factor to determine distance of control point from the end point
+				let scaleFactor = Math.sqrt(Math.pow(e.x-s.x, 2) + Math.pow(e.y-s.y, 2)) / 2;
 
-				orth.x /= norm;
-				orth.y /= norm;
+				//transform the orthogonal vector
+				orthogonal.x /= norm;
+				orthogonal.y /= norm;
 
-				orth.x *= n1;
-				orth.y *= n1;
+				orthogonal.x *= scaleFactor;
+				orthogonal.y *= scaleFactor;
 
-				let ctrp;
+				let controlPoint;
 
-				let angle = Math.atan2(e.y-s.y, e.x-s.x);
-				let ng = angle * (180/Math.PI);
-				ng *= -1;
-
-				let op;
-
-				if( e.y < s.y ) {
-					if( e.x < s.x ) {
-						op = -1;
-					} else {
-						op = 1;
-					}
-				} else {
-					if( e.x < s.x ) {
-						op = -1;
-					} else {
-						op = 1;
-					}
-				}
-				if( op > 0 ) {
-					ctrp = {
-						x: e.x - orth.x,
-						y: e.y - orth.y
+				//determine which side the control point should be
+				//with respect to the orthogonal vector
+				if( e.x < s.x ) {
+					controlPoint = {
+						x: e.x + orthogonal.x,
+						y: e.y + orthogonal.y
 					};
 				} else {
-					ctrp = {
-						x: e.x + orth.x,
-						y: e.y + orth.y
+					controlPoint = {
+						x: e.x - orthogonal.x,
+						y: e.y - orthogonal.y
 					};
 				}
 
-				let pointRandomizer = d3.random.normal(3, 2);
-				let bezierRandomizer = d3.random.normal(10, 3);
+				//randomize the start, end and controlPoint a bit
+				s.x += this._options.pointRandomizer();
+				s.y += this._options.pointRandomizer();
+				e.x += this._options.pointRandomizer();
+				e.y += this._options.pointRandomizer();
+				controlPoint.x += this._options.bezierRandomizer();
+				controlPoint.y += this._options.bezierRandomizer();
 
-				// s.x += pointRandomizer();
-				// s.y += pointRandomizer();
-				e.x += pointRandomizer();
-				e.y += pointRandomizer();
-				ctrp.x += bezierRandomizer();
-				ctrp.y += bezierRandomizer();
-
-				let str = `M${s.x},${s.y}, Q${ctrp.x},${ctrp.y} ${e.x},${e.y}`
+				//construct the bezier curve
+				let str = `M${s.x},${s.y}, Q${controlPoint.x},${controlPoint.y} ${e.x},${e.y}`
 				return str;
-			});
+			})
+		;
+
+		//get coordinates of squares from keys such as "e2-e4"
+		function getSquareCoords(d) {
+			let squares = [];
+
+			for( let i = 0; i < 2; i ++ ) {
+				let square = d.split('-')[i].toLowerCase();
+
+				let file = square.charCodeAt(0) - 97;
+				let rank = 8 - square[1];
+
+				let x = (file * self._options.squareWidth) + (self._options.squareWidth / 2);
+				let y = (rank * self._options.squareWidth) + (self._options.squareWidth / 2);
+
+				squares.push({
+					x,
+					y
+				});
+			}
+
+			return squares;
+		}
 	}
 }
