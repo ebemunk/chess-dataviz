@@ -10,9 +10,27 @@
 </head>
 <body>
 
+<h1>Eval and Time Graph</h1>
 <div id="eval-and-time-graph" class="cdv-eval-time wrap"></div>
 
-<div id="squtil" class="cdv-heatmap"></div>
+<h1>Heatmap</h1>
+<div id="heatmap" class="cdv-heatmap"></div>
+<button class="piece-selector">wall</button>
+<button class="piece-selector">wk</button>
+<button class="piece-selector">wq</button>
+<button class="piece-selector">wr</button>
+<button class="piece-selector">wb</button>
+<button class="piece-selector">wn</button>
+<button class="piece-selector">wp</button>
+<br>
+<button class="piece-selector">ball</button>
+<button class="piece-selector">bk</button>
+<button class="piece-selector">bq</button>
+<button class="piece-selector">br</button>
+<button class="piece-selector">bb</button>
+<button class="piece-selector">bn</button>
+<button class="piece-selector">bp</button>
+<br>
 <select id="kek">
 	<option value="squareUtilization">squtil</option>
 	<option value="moveSquares">moveSquares</option>
@@ -20,8 +38,13 @@
 	<option value="checkSquares">checkSquares</option>
 </select>
 
-<div id="ops" class="cdv-openings">
-</div>
+<h1>Openings</h1>
+<div id="openings" class="cdv-openings"></div>
+
+<h1>Move Paths</h1>
+<div id="movepaths" class="cdv-move-paths"></div>
+<button class="piece-path-selector">Nb1</button>
+<button class="piece-path-selector">Bc1</button>
 
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="/dist/ChessDataViz.js"></script>
@@ -35,31 +58,56 @@
 	// 	evalAndTimeGraph.update(CG.util.parseGameNotation(data[4]));
 	// });
 
-	// var lol = new CG.HeatMap('#squtil', {
-	// 		sideLength: 500
-	// 	});
+	d3.json('/data/new_statistics.json', function (error, data) {
+		var heatmap = new CG.HeatMap('#heatmap', {
+			width: 500
+		}, data.heatmaps.squareUtilization);
 
-	// var hm;
-	d3.json('/data/games_statistics.json', function (error, data) {
-	// 	lol.setData(data.checkSquares);
-	// 	setTimeout(function () {
-	// 	lol.update();
-	var kes = new CG.Openings('#ops', {
-		arcThreshold: 0.01,
-		textThreshold: 0.15
-	}, data);
+		$('.piece-selector').on('click', function () {
+			var text = $(this).text();
+			var color = text[0];
+			var piece = text[1];
 
-	// }, 000)
-		// hm = data;
+			if( text === 'wall' ) {
+				color = 'w';
+				piece = 'all';
+			}
+
+			if( text === 'ball' ) {
+				color = 'b';
+				piece = 'all';
+			}
+
+			heatmap.options({
+				accessor: {
+					piece: piece,
+					color: color
+				}
+			});
+		});
+
+		var openings = new CG.Openings('#openings', {
+			arcThreshold: 0.001,
+			textThreshold: 0.1,
+			colors: d3.scale.ordinal().range(['red', 'lightblue', 'gray', 'black'])
+		}, data.openings);
+
+		openings.dispatch.on('mouseenter', function (a,b,c,d) {
+			console.log(a,b,c,d);
+		})
+
+		var movePaths = new CG.MovePaths('#movepaths', {
+		}, data.moves);
+
+
+		$('.piece-path-selector').on('click', function () {
+			var text = $(this).text();
+
+			movePaths.options({
+				accessor: text
+			});
+		});
 	});
-
-	// $('#kek').on('change', function () {
-	// 	console.log($('#kek').val());
-	// 	lol.setData(hm[$('#kek').val()])
-	// 	lol.update()
-	// })
-
-
 </script>
 </body>
 </html>
