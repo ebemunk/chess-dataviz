@@ -197,7 +197,7 @@ export class MovePaths {
 				controlPoint.y += this._options.bezierRandomizer();
 
 				//construct the bezier curve
-				let str = `M${s.x},${s.y}, Q${controlPoint.x},${controlPoint.y} ${e.x},${e.y}`
+				let str = `M${s.x},${s.y}, Q${controlPoint.x},${controlPoint.y} ${e.x},${e.y}`;
 				return str;
 			})
 		;

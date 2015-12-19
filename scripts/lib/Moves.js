@@ -1,9 +1,10 @@
 'use strict';
 
 const _ = require('lodash');
+const debug = require('debug')('stats:moves');
 
 function parseMove(move, i) {
-	let check = /\+/.test(move);
+	// let check = /\+/.test(move);
 
 	move = move.replace(/\+/g, '').replace(/#/g, '');
 
@@ -24,7 +25,7 @@ function parseMove(move, i) {
 		piece: piece,
 		capture: /x/.test(move),
 		castle: castle,
-		color: i % 2 === 0 ? 'w' : 'b',
+		color: i % 2 === 0 ? 'w' : 'b'
 	};
 
 	if( parsedMove.castle ) {
@@ -45,7 +46,7 @@ class Moves {
 				let pawn = `${file}${rank}`;
 				this.pieces[pawn] = [pawn];
 			}
-		};
+		}
 
 		let pieces = {
 			N: ['b', 'g'],
@@ -60,21 +61,20 @@ class Moves {
 				for( let rank of [1, 8] ) {
 					this.pieces[`${piece}${file}${rank}`] = [`${file}${rank}`];
 				}
-			};
+			}
 		});
 
 		this.survivalData = {};
-
-		// console.log(this.pieces);
 	}
 
 	update(moves) {
-		// console.log('NEW GAME ---------------');
+		debug('NEW GAME ---------------');
+
 		let pieceLocations = _.cloneDeep(this.pieces);
 		let currentSquareState = _.chain(pieceLocations).invert().mapValues(val => [val]).value();
 
 		moves.forEach((move, i) => {
-			// console.log('MOVE:', move);
+			debug('MOVE:', move);
 
 			let parsedMove = parseMove(move, i);
 
@@ -85,7 +85,7 @@ class Moves {
 			let originalPiece = _.last(_.get(currentSquareState, parsedMove.from) || [parsedMove.fromName]);
 			let target = _.last(_.get(currentSquareState, parsedMove.to) || [parsedMove.to]);
 
-			// console.log(parsedMove, originalPiece, target)
+			debug(parsedMove, originalPiece, target);
 
 			pieceLocations[originalPiece].push(parsedMove.to);
 
@@ -101,7 +101,6 @@ class Moves {
 
 					target = _.last(_.get(currentSquareState, enPassantSquare) || [enPassantSquare]);
 				}
-			// console.log(target === 'empty',parsedMove, originalPiece, target)
 
 				pieceLocations[target].push(`captured-${i}`);
 			}
@@ -119,8 +118,8 @@ class Moves {
 				}
 			}
 
-			// console.log(pieceLocations);
-			// console.log(currentSquareState);
+			debug(pieceLocations);
+			debug(currentSquareState);
 		});
 
 		_.forEach(pieceLocations, (moves, piece) => {
@@ -132,7 +131,7 @@ class Moves {
 				}
 
 				if( this.survivalData[piece][`${prev}-${move}`] ) {
-					this.survivalData[piece][`${prev}-${move}`]++
+					this.survivalData[piece][`${prev}-${move}`]++;
 				} else {
 					this.survivalData[piece][`${prev}-${move}`] = 1;
 				}
@@ -140,8 +139,6 @@ class Moves {
 				prev = move;
 			});
 		});
-
-		// throw kek;
 	}
 }
 

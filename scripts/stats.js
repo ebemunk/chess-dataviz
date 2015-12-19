@@ -1,20 +1,19 @@
 /*eslint no-console: 0*/
-/*eslint no-unused-lets: 0*/
+/*eslint no-unused-vars: 0*/
 
 'use strict';
 
-let debug = require('debug')('stats');
+const debug = require('debug')('stats');
 
-let Promise = require('bluebird');
-let fs = Promise.promisifyAll(require('fs'));
-let Chess = require('chess.js').Chess;
-let _ = require('lodash');
-let highland = require('highland');
+const Promise = require('bluebird');
+const fs = Promise.promisifyAll(require('fs'));
+const _ = require('lodash');
+const highland = require('highland');
 
-let minimist = require('minimist');
-let colors = require('colors');
+const minimist = require('minimist');
+const colors = require('colors');
 
-let argv = minimist(process.argv.slice(2), {
+const argv = minimist(process.argv.slice(2), {
 	alias: {
 		file: 'f'
 	},
@@ -23,9 +22,9 @@ let argv = minimist(process.argv.slice(2), {
 	}
 });
 
-let Openings = require('./lib/Openings.js');
-let Heatmaps = require('./lib/Heatmaps.js');
-let Moves = require('./lib/Moves.js');
+const Openings = require('./lib/Openings.js');
+const Heatmaps = require('./lib/Heatmaps.js');
+const Moves = require('./lib/Moves.js');
 
 console.log('  source file'.cyan, argv.file);
 
@@ -34,6 +33,8 @@ let openings = new Openings();
 let movesz = new Moves();
 
 let start = new Date();
+
+debug(argv);
 
 highland(fs.createReadStream(argv.file, {encoding: 'utf8'}))
 .splitBy(/\r?\n\r?\n(?=\[)/g) //split pgns with multiple games by game
