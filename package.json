@@ -7,17 +7,19 @@
   },
   "author": "ebemunk <ebemunk@gmail.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ebemunk/chess-dataviz"
+  },
   "dependencies": {
     "bluebird": "^3.0.1",
     "chess.js": "^0.9.1",
     "colors": "^1.1.2",
     "debug": "^2.2.0",
-    "event-stream": "^3.3.2",
     "highland": "^2.5.1",
     "lodash": "^3.10.1",
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
-    "pace": "0.0.4",
     "phantom": "^0.8.0",
     "request": "^2.65.0"
   },
