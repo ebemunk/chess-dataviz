@@ -50,7 +50,11 @@ gulp.task('less', function () {
 			autoprefixer({
 				browsers: ['last 2 versions']
 			}),
-			mqpacker,
+			mqpacker
+		]))
+		.pipe(gulp.dest('./dist'))
+		.pipe(rename('ChessDataViz.min.css'))
+		.pipe(postcss([
 			csswring({
 				removeAllComments: true
 			})
