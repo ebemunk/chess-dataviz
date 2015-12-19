@@ -62,9 +62,6 @@ export class Openings {
 		let self = this;
 
 		let nodes = this.partition.nodes(data).filter(d => d.dx > this.options.arcThreshold);
-		let totalCount = nodes[0].value;
-		let percentageFormat = d3.format('.2p');
-
 		let arcs = this.root.selectAll('.arc').data(nodes);
 
 		arcs.enter()
@@ -102,19 +99,11 @@ export class Openings {
 				arcs.filter(node => parents.indexOf(node) > -1)
 				.style('opacity', 1);
 
-				let count = d.count || 0;
-
-				this.percentageText.text(percentageFormat(count / totalCount));
-				this.countText.text(count + ' games');
-
 				let moves = _.pluck(parents, 'san');
 				this.dispatch.mouseenter(d, i, moves);
 			})
 			.on('mouseleave', () => {
 				arcs.style('opacity', 1);
-
-				this.percentageText.text(percentageFormat(1));
-				this.countText.text(totalCount + ' games');
 
 				this.dispatch.mouseleave();
 			})
@@ -152,25 +141,6 @@ export class Openings {
 		;
 
 		sanText.exit().remove();
-
-		if( ! this.percentageText ) {
-			this.percentageText = this.root
-				.append('text')
-					.attr('class', 'percentage-text')
-					.attr('text-anchor', 'middle')
-					.text(percentageFormat(1))
-			;
-		}
-
-		if( ! this.countText ) {
-			this.countText = this.root
-				.append('text')
-					.attr('class', 'count-text')
-					.attr('text-anchor', 'middle')
-					.attr('dy', 25)
-					.text(totalCount + ' games')
-			;
-		}
 	}
 }
 
