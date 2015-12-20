@@ -49,19 +49,35 @@
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="/dist/ChessDataViz.js"></script>
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.6.7/d3-tip.min.js"></script>
 <script>
-	// var evalAndTimeGraph = new CG.EvalAndTime('#eval-and-time-graph', {
-	// 	playerPaneWidth: 200
-	// });
+	d3.json('/data/london-chess-classic-2015.json', function (error, data) {
+		var evalAndTimeGraph = new CG.EvalAndTime('#eval-and-time-graph', {
+			playerPaneWidth: 200
+		});
 
-	// d3.json('/data/shamkir-gashimov-memorial-2015.json', function (error, data) {
-	// 	evalAndTimeGraph.update(CG.util.parseGameNotation(data[4]));
-	// });
+		evalAndTimeGraph.update(CG.util.parseGameNotation(data[4]));
+	});
 
-	d3.json('/data/new_statistics.json', function (error, data) {
-		var heatmap = new CG.HeatMap('#heatmap', {
-			width: 500
+	d3.json('/data/tt_heatmaps.json', function (error, data) {
+	// d3.json('/data/new_statistics1.json', function (error, data) {
+		// var tip = d3.tip()
+		// 	.attr('class', 'd3-tip')
+		// 	.style('color', 'red')
+		// 	.offset([0, 0])
+		// 	.html(function(d) {
+		// 		return d;
+		// 	})
+		// ;
+
+		window.heatmap = new CG.HeatMap('#heatmap', {
+			width: 500,
+			colorScale: false
 		}, data.heatmaps.squareUtilization);
+
+		// heatmap.dispatch.on('mouseenter', tip.show);
+		// heatmap.dispatch.on('mouseleave', tip.hide);
+		// heatmap.dataContainer.call(tip);
 
 		$('.piece-selector').on('click', function () {
 			var text = $(this).text();
@@ -85,18 +101,20 @@
 				}
 			});
 		});
+	});
 
-		var openings = new CG.Openings('#openings', {
+	d3.json('/data/tt_openings.json', function (error, data) {
+		window.openings = new CG.Openings('#openings', {
 			arcThreshold: 0.001,
 			textThreshold: 0.1,
 			colors: d3.scale.ordinal().range(['red', 'lightblue', 'gray', 'black'])
 		}, data.openings);
 
-		openings.dispatch.on('mouseenter', function (a,b,c,d) {
-			console.log(a,b,c,d);
-		})
+	});
 
-		var movePaths = new CG.MovePaths('#movepaths', {
+	d3.json('/data/tt_moves.json', function (error, data) {
+		window.movePaths = new CG.MovePaths('#movepaths', {
+			binSize: 500
 		}, data.moves);
 
 
