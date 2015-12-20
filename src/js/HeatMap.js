@@ -9,10 +9,6 @@ let log = debug('cdv:HeatMap');
 
 export class HeatMap {
 	constructor(selector, options, data) {
-		let self = this;
-
-		if( ! selector ) throw Error('need dom selector');
-
 		//container setup
 		this.container = d3.select(selector);
 
@@ -20,11 +16,12 @@ export class HeatMap {
 		let defaultOptions = {
 			width: 500,
 			margin: 20,
-			interactive: true,
 			accessor: {
 				piece: 'all',
 				color: 'w'
-			}
+			},
+			sizeScale: true,
+			colorScale: false
 		};
 
 		options = options || {};
@@ -33,10 +30,18 @@ export class HeatMap {
 		this._options.boardWidth = this._options.width - this._options.margin * 2;
 		this._options.squareWidth = Math.floor(this._options.boardWidth / 8);
 
-		//scale
-		this.scale = d3.scale.linear()
-			.range([0, this._options.squareWidth])
-		;
+		//event dispatcher
+		this.dispatch = d3.dispatch('mouseenter', 'mousemove', 'mouseleave');
+
+		//scales
+		this._scale = {
+			size: d3.scale.linear().range([0, this._options.squareWidth]),
+			color: d3.scale.linear().range(['blue', 'red'])
+		};
+
+		if( _.isArray(this._options.colorScale) ) {
+			this._scale.color.range(this._options.colorScale);
+		}
 
 		//clear element
 		this.container.selectAll('*').remove();
@@ -54,76 +59,14 @@ export class HeatMap {
 			.attr('class', 'board')
 		;
 
-		//board squares
-		let board = util.boardSquares();
-
-		//create the g elements for squares
-		let squares = svg.selectAll('.square').data(board).enter()
-			.append('g')
-				.attr('class', (d) => {
-					let file = String.fromCharCode(97 + d.x);
-					let rank = 8 - d.y;
-
-					return 'square ' + file + rank;
-				})
-				.classed('white', (d) => util.isWhite(d))
-				.classed('black', (d) => ! util.isWhite(d))
-		;
-
-		//create square elements for board squares
-		squares.append('rect')
-			.attr('x', (d) => d.x * this._options.squareWidth)
-			.attr('y', (d) => d.y * this._options.squareWidth)
-			.attr('width', this._options.squareWidth + 'px')
-			.attr('height', this._options.squareWidth + 'px')
-			.attr('class', 'sq')
-		;
-
-		//labels among the A file
-		let fileLabels = d3.range(8).map((i) => '.a' + (i + 1));
-
-		//file labels
-		svg.selectAll(fileLabels)
-			.append('text')
-				.attr('x', (d) => d.x * this._options.squareWidth)
-				.attr('y', (d) => d.y * this._options.squareWidth)
-				.attr('dx', '0.2em')
-				.attr('dy', '1em')
-				.text((d) => 8 - d.y)
-				.attr('class', 'label')
-		;
-
-		//a-h labels for files
-		let files = d3.range(8).map((i) => String.fromCharCode(97 + i));
-		let rankLabels = files.slice().map((file) => '.' + file + '1');
-
-		//rank labels
-		svg.selectAll(rankLabels)
-			.append('text')
-				.attr('x', (d) => (d.x + 1) * this._options.squareWidth)
-				.attr('y', (d) => (d.y + 1) * this._options.squareWidth)
-				.attr('dx', '-0.3em')
-				.attr('dy', '-0.5em')
-				.attr('text-anchor', 'end')
-				.text((d) => files[d.x])
-				.attr('class', 'label')
-		;
+		util.drawBoard(svg, this._options.squareWidth);
 
 		//container for heatmap data
 		this.dataContainer = svg.append('g')
 			.attr('class', 'data-container')
 		;
 
-		//tooltip element
-		this.tooltip = this.container.append('div')
-			.attr('class', 'tooltip')
-		;
-
-		if( data ) {
-			this._data = data;
-
-			this.update();
-		}
+		this.data(data);
 	}
 
 	data(data) {
@@ -133,7 +76,18 @@ export class HeatMap {
 	}
 
 	options(options) {
-		_.merge(this._options, options);
+		let omit = [
+			'width',
+			'margin',
+			'boardWidth',
+			'squareWidth'
+		];
+
+		_.merge(this._options, _.omit(options, omit));
+
+		if( _.isArray(this._options.colorScale) ) {
+			this._scale.color.range(this._options.colorScale);
+		}
 
 		this.update();
 	}
@@ -141,20 +95,15 @@ export class HeatMap {
 	update() {
 		let self = this;
 
-		if( ! this._options.interactive ) {
-			this.tooltip.classed('visible', false);
-		}
+		//adjust scales
+		let extent = d3.extent(this._data, (d) => d[this._options.accessor.piece][this._options.accessor.color]);
 
-		//set domain
-		this.scale.domain(
-			d3.extent(this._data, (d) => d[this._options.accessor.piece][this._options.accessor.color])
-		);
+		this._scale.size.domain(extent);
+		this._scale.color.domain(extent);
 
-		//extract relevant data
-		let data = this._data.map((d) => this.scale(d[this._options.accessor.piece][this._options.accessor.color]));
-
+		//update heat squares
 		let heatSquares = this.dataContainer
-			.selectAll('.heat-square').data(data)
+			.selectAll('.heat-square').data(this._data)
 		;
 
 		//enter
@@ -162,46 +111,56 @@ export class HeatMap {
 			.append('rect')
 				.attr('x', (d, i) => (i % 8 * this._options.squareWidth) + (this._options.squareWidth / 2))
 				.attr('y', (d, i) => (Math.floor(i / 8) * this._options.squareWidth) + (this._options.squareWidth / 2))
-				.attr('width', (d) => d + 'px')
-				.attr('height', (d) => d + 'px')
+				.attr('width', (d) => squareSize(d) + 'px')
+				.attr('height', (d) => squareSize(d) + 'px')
 				.attr('transform', (d) => {
-					let halfWidth = d / 2;
+					let halfWidth = squareSize(d) / 2;
 					return 'translate(-' + halfWidth + ',-' + halfWidth + ')';
 				})
 				.attr('class', 'heat-square')
-				.on('mouseover', function(d, i) {
-					if( ! self._options.interactive ) return;
-
-					self.tooltip
-						.html(self._data[i][self._options.accessor.piece][self._options.accessor.color])
-						.style('left', (d3.event.pageX) + 'px')
-						.style('top', (d3.event.pageY - 28) + 'px')
-						.classed('visible', true)
-					;
+				.style('fill', (d, i) => squareColor(d))
+				.on('mouseenter', (d, i) => {
+					this.dispatch.mouseenter(d[this._options.accessor.piece][this._options.accessor.color]);
 				})
-				.on('mousemove', function (d) {
-					if( ! self._options.interactive ) return;
-
-					self.tooltip
-						.style('left', (d3.event.pageX) + 'px')
-						.style('top', (d3.event.pageY - 28) + 'px')
-					;
+				.on('mousemove', (d, i) => {
+					this.dispatch.mousemove();
 				})
-				.on('mouseout', function(d) {
-					if( ! self._options.interactive ) return;
-
-					self.tooltip.classed('visible', false);
+				.on('mouseout', (d, i) => {
+					this.dispatch.mouseleave();
 				})
 		;
 
 		//enter + update
 		heatSquares.transition()
-			.attr('width', (d) => d + 'px')
-			.attr('height', (d) => d + 'px')
+			.attr('width', (d) => squareSize(d) + 'px')
+			.attr('height', (d) => squareSize(d) + 'px')
 			.attr('transform', (d) => {
-				let halfWidth = d / 2;
+				let halfWidth = squareSize(d) / 2;
 				return 'translate(-' + halfWidth + ',-' + halfWidth + ')';
 			})
+			.style('fill', (d, i) => squareColor(d))
 		;
+
+		function squareSize(d) {
+			let size;
+
+			if( self._options.sizeScale ) {
+				size = self._scale.size(d[self._options.accessor.piece][self._options.accessor.color]);
+			} else {
+				size = self._options.squareWidth;
+			}
+
+			return size;
+		}
+
+		function squareColor(d) {
+			let color;
+
+			if( self._options.colorScale ) {
+				color = self._scale.color(d[self._options.accessor.piece][self._options.accessor.color]);
+			}
+
+			return color;
+		}
 	}
 }
