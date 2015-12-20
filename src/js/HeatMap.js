@@ -66,7 +66,9 @@ export class HeatMap {
 			.attr('class', 'data-container')
 		;
 
-		this.data(data);
+		if( data ) {
+			this.data(data);
+		}
 	}
 
 	data(data) {
