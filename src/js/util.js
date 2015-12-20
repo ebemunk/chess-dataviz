@@ -40,7 +40,7 @@ export function parseGameNotation(game) {
 	return parsedGame;
 }
 
-export function boardSquares() {
+function boardSquares() {
 	var squares = [];
 
 	for( let i = 0; i < 64; i++ ) {
@@ -104,8 +104,8 @@ export function drawBoard(svg, squareWidth) {
 	//rank labels
 	svg.selectAll(rankLabels)
 		.append('text')
-			.attr('x', (d) => (d.x + 1) * .squareWidth)
-			.attr('y', (d) => (d.y + 1) * .squareWidth)
+			.attr('x', (d) => (d.x + 1) * squareWidth)
+			.attr('y', (d) => (d.y + 1) * squareWidth)
 			.attr('dx', '-0.3em')
 			.attr('dy', '-0.5em')
 			.attr('text-anchor', 'end')
