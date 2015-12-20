@@ -5,7 +5,7 @@ import _ from 'lodash';
 import debug from 'debug';
 import * as util from './util';
 
-let log = debug('cv:MovePaths');
+let log = debug('cdv:MovePaths');
 
 export class MovePaths {
 	constructor(selector, options, data) {
