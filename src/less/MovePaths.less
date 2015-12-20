@@ -1,36 +1,27 @@
-.white rect {
-	fill: white;
+.white {
+	rect {
+		fill: white;
+	}
+
+	.label {
+		fill: black;
+	}
 }
-.black rect {
-	fill: black;
+
+.black {
+	rect {
+		fill: black;
+	}
+
+	.label {
+		fill: white;
+	}
 }
 
 .label {
 	text-transform: lowercase;
 	font-family: sans-serif;
 	font-size: 12px;
-}
-.white .label {
-	fill: black;
-}
-.black .label {
-	fill: white;
-}
-
-.tooltip {
-	padding: 0.2em;
-	font-family: sans-serif;
-	position: absolute;
-	text-align: center;
-	background: white;
-	pointer-events: none;
-	opacity: 0;
-
-	transition: opacity 250ms;
-
-	&.visible {
-		opacity: 0.8;
-	}
 }
 
 .move-path {
