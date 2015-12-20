@@ -3,11 +3,12 @@
 import debug from 'debug';
 import _ from 'lodash';
 
-let log = debug('cv:Openings');
+let log = debug('cdv:Openings');
 
 export class Openings {
 	constructor(selector, options, data) {
-		if( ! selector ) throw Error('need dom selector');
+		//container setup
+		this.container = d3.select(selector);
 
 		let defaultOptions = {
 			width: 550,
@@ -18,80 +19,78 @@ export class Openings {
 		};
 
 		options = options || {};
+		this._options = _.merge({}, defaultOptions, options);
 
-		this.options = _.merge({}, defaultOptions, options);
-		this.dispatch = d3.dispatch('mouseenter', 'mouseleave');
+		//event dispatcher
+		this.dispatch = d3.dispatch('mouseenter', 'mousemove', 'mouseleave');
 
-		log('constructor', this.options);
-
-		this.partition = d3.layout.partition()
+		this._partition = d3.layout.partition()
 			.sort(null)
 			.value(d => d.count)
 		;
 
-		let radius = Math.min(this.options.width, this.options.height) / 2;
+		let radius = Math.min(this._options.width, this._options.height) / 2;
 
-		let xScale = d3.scale.linear()
-			.range([0, 2 * Math.PI])
-		;
+		let xScale = d3.scale.linear().range([0, 2 * Math.PI]);
+		let yScale = d3.scale.sqrt().range([0, radius]);
 
-		let yScale = d3.scale.sqrt()
-			.range([0, radius])
-		;
-
-		this.root = d3.select(selector).append('svg')
-			.attr('width', this.options.width)
-			.attr('height', this.options.height)
-				.append('g')
-					.attr('transform', 'translate(' + this.options.width / 2 + ',' + this.options.height / 2 + ')')
-		;
-
-		this.arc = d3.svg.arc()
+		this._arc = d3.svg.arc()
 			.startAngle(d => Math.max(0, Math.min(2 * Math.PI, xScale(d.x))))
 			.endAngle(d => Math.max(0, Math.min(2 * Math.PI, xScale(d.x + d.dx))))
 			.innerRadius(d => Math.max(0, yScale(d.y)))
 			.outerRadius(d => Math.max(0, yScale(d.y + d.dy)))
 		;
 
-		if( data ) this.update(data);
+		this.dataContainer = this.container.append('svg')
+			.attr('width', this._options.width)
+			.attr('height', this._options.height)
+				.append('g')
+					.attr('transform', 'translate(' + this._options.width / 2 + ',' + this._options.height / 2 + ')')
+		;
+
+		if( data ) {
+			this.data(data);
+		}
 	}
 
-	update(data) {
-		log('update');
+	data(data) {
+		this._data = data;
 
+		this.update();
+	}
+
+	options(options) {
+		let omit = [
+			'width',
+			'height'
+		];
+
+		_.merge(this._options, _.omit(options, omit));
+
+		this.update();
+	}
+
+	update() {
 		let self = this;
 
-		let nodes = this.partition.nodes(data).filter(d => d.dx > this.options.arcThreshold);
-		let arcs = this.root.selectAll('.arc').data(nodes);
+		let nodes = this._partition.nodes(this._data).filter(d => d.dx > this._options.arcThreshold);
+
+		let arcs = this.dataContainer.selectAll('.arc').data(nodes);
 
 		arcs.enter()
 			.append('path')
 				.attr('display', d => d.depth ? null : 'none')
-				.attr('d', this.arc)
+				.attr('d', this._arc)
 				.attr('fill-rule', 'evenodd')
 				.attr('class', 'arc')
-				.each(function() {
+				.each(function(d) {
 					this.x0 = 0;
 					this.dx0 = 0;
 				})
+				.style('fill', fillColor)
 		;
 
 		arcs
-			.style('fill', (d, i) => { 
-				if( i === 0 ) return;
-
-				let rootParent = getParents(d)[0];
-				let color = d3.hsl(this.options.colors(rootParent.san));
-
-				if( d.depth % 2 === 0 ) {
-					color = color.darker(0.5);
-				} else {
-					color = color.brighter(0.5);
-				}
-
-				color = color.darker(d.depth * 0.2);
-				return color; 
-			})
 			.on('mouseenter', (d, i) => {
 				let parents = getParents(d);
 
@@ -100,7 +99,10 @@ export class Openings {
 				.style('opacity', 1);
 
 				let moves = _.pluck(parents, 'san');
-				this.dispatch.mouseenter(d, i, moves);
+				this.dispatch.mouseenter(d, moves);
+			})
+			.on('mousemove', () => {
+				this.dispatch.mousemove();
 			})
 			.on('mouseleave', () => {
 				arcs.style('opacity', 1);
@@ -114,16 +116,20 @@ export class Openings {
 						dx: this.dx0
 					}, d);
 
+					this.x0 = d.x;
+					this.dx0 = d.dx;
+
 					return function(t) {
 						var b = interpolate(t);
-						return self.arc(b);
+						return self._arc(b);
 					};
 				})
+			.style('fill', fillColor)
 		;
 
 		arcs.exit().remove();
 
-		let sanText = this.root.selectAll('.san').data(nodes);
+		let sanText = this.dataContainer.selectAll('.san').data(nodes);
 		sanText.enter()
 			.append('text')
 				.attr('class', 'san')
@@ -132,15 +138,31 @@ export class Openings {
 		;
 
 		sanText.transition().duration(500)
-			.attr('transform', d => 'translate(' + this.arc.centroid(d) + ')')
+			.attr('transform', d => 'translate(' + this._arc.centroid(d) + ')')
 			.text(d => {
-				if( d.dx < this.options.textThreshold ) return '';
+				if( d.dx < this._options.textThreshold ) return '';
 
 				return d.depth ? d.san : '';
 			})
 		;
 
 		sanText.exit().remove();
+
+		function fillColor(d, i) {
+			if( i === 0 ) return;
+
+			let rootParent = getParents(d)[0];
+			let color = d3.hsl(self._options.colors(rootParent.san));
+
+			if( d.depth % 2 === 0 ) {
+				color = color.darker(0.5);
+			} else {
+				color = color.brighter(0.5);
+			}
+
+			color = color.darker(d.depth * 0.2);
+			return color;
+		}
 	}
 }
 
