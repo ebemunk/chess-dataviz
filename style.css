@@ -9,22 +9,30 @@
 	font-size: 1.4em;
 }
 
-#portamento_container {
-	position:relative;
-}
-
-#portamento_container .menu {
-	position:absolute;
-}
-
-#portamento_container .menu.fixed {
-	position:fixed;
+.flex {
+	display: flex;
+	flex-direction: column;
 }
 
 table td {
 	vertical-align: top;
 }
 
+.menu-wrap {
+	position: relative;
+	flex: 1;
+}
 .menu li {
+	margin-bottom: 0;
+}
+.menu a {
+	text-decoration: none;
+	color: inherit;
+	transition: color 250ms;
+}
+.menu a:hover {
+	color: #1EAEDB;
+}
+.menu h6 {
 	margin-bottom: 0;
 }
