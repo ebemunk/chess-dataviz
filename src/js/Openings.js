@@ -1,4 +1,5 @@
 /*global d3*/
+/*eslint no-unused-vars: 0*/
 
 import debug from 'debug';
 import _ from 'lodash';

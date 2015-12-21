@@ -52,11 +52,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.6.7/d3-tip.min.js"></script>
 <script>
 	d3.json('/data/london-chess-classic-2015.json', function (error, data) {
-		window.evalAndTime = new ChessDataViz.EvalAndTime('#eval-and-time-graph', {
-			playerPaneWidth: 200
-		});
-
-		evalAndTime.data(ChessDataViz.util.parseGameNotation(data[4].notation));
+		window.evalAndTime = new ChessDataViz.EvalAndTime('#eval-and-time-graph', ChessDataViz.util.parseGameNotation(data[4].notation));
 	});
 
 	d3.json('/data/tt_heatmaps.json', function (error, data) {

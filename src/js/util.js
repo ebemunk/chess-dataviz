@@ -1,3 +1,5 @@
+/*global d3*/
+
 function parseMinutes(move, i) {
 	let min = move.time.match(/(\d+)m/);
 	min = min ? +min[1] : 0;
