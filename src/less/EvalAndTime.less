@@ -7,37 +7,41 @@
 .axis {
 	font-size: 12px;
 	font-weight: 400;
-}
-.axis path, .axis line {
-	fill: none;
-	stroke: black;
-}
-.axis .axis-label {
-	fill: #777;
+
+	path, line {
+		fill: none;
+		stroke: black;
+	}
+
+	.axis-label {
+		fill: #777;
+	}
 }
 
 .bar {
 	opacity: 0.9;
-}
-.bar.white {
-	fill: white;
+
+	&.white {
+		fill: white;
+	}
 }
 
 .line {
 	fill: none;
 	stroke: black;
 	stroke-width: 1.5px;
-}
-.line.white {
-	stroke: white;
-}
 
+	&.white {
+		stroke: white;
+	}
+}
 .area {
 	fill: black;
 	opacity: 0.65;
-}
-.area.white {
-	fill: white;
+
+	&.white {
+		fill: white;
+	}
 }
 
 .eval-guides {
@@ -56,40 +60,14 @@
 
 .interactive-layer {
 	fill: none;
-}
 
-.interactive-layer .guide {
-	stroke: red;
-	stroke-width: 1px;
-	stroke-dasharray: 5 1;
-}
+	.guide {
+		stroke: red;
+		stroke-width: 1px;
+		stroke-dasharray: 5 1;
 
-.interactive-layer .guide.hidden {
-	display: none;
-}
-
-.player-info {
-	width: 200px;
-	min-width: 200px;
-	display: table-cell;
-	vertical-align: middle;
-	text-align: center;
-}
-
-.player-info .player-result {
-	margin: 50% 0;
-	text-transform: uppercase;
-}
-
-.player-info .player-image img {
-	overflow: hidden;
-	border-radius: 50%;
-}
-
-.player-info .player-white .player-image img {
-	border: white 5px solid;
-}
-
-.player-info .player-black .player-image img {
-	border: black 5px solid;
+		&.hidden {
+			display: none;
+		}
+	}
 }
