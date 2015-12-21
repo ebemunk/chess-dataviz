@@ -1,9 +1,9 @@
 /*global d3*/
 
 import _ from 'lodash';
-import dbg from 'debug';
+import debug from 'debug';
 
-let debug = dbg('cdv:EvalAndTime');
+let log = debug('cdv:EvalAndTime');
 
 /*
 Plots evaluation & time usage for a game.
@@ -27,19 +27,14 @@ Expects a game object such as:
 
 */
 export class EvalAndTime {
-	constructor(selector, options) {
+	constructor(selector, options, data) {
 		let self = this;
 
-		if( ! selector ) throw Error('need dom selector');
-
 		//container
-		this.selector = selector;
-
 		this.container = d3.select(selector);
 
 		//options
 		let defaultOptions = {
-			playerPaneWidth: 200,
 			width: 960,
 			height: 500,
 			margin: {
@@ -53,42 +48,43 @@ export class EvalAndTime {
 
 		options = options || {};
 
-		this.options = _.merge({}, defaultOptions, options);
+		this._options = _.merge({}, defaultOptions, options);
 
-		debug('options', this.options);
+		this._width = this._options.width - this._options.margin.left - this._options.margin.right;
+		this._height = this._options.height - this._options.margin.top - this._options.margin.bottom;
 
-		this.width = this.options.width - this.options.playerPaneWidth - this.options.margin.left - this.options.margin.right;
-		this.height = this.options.height - this.options.margin.top - this.options.margin.bottom;
+		//event dispatcher
+		this.dispatch = d3.dispatch('mouseenter', 'mousemove', 'mouseleave');
 
 		//scales
-		this.xScale = d3.scale.ordinal()
-			.rangeBands([0, this.width], 0.1, 0)
+		this._xScale = d3.scale.ordinal()
+			.rangeBands([0, this._width], 0.1, 0)
 		;
 
-		this.yEvalScale = d3.scale.linear()
-			.range([this.height, 0])
+		this._yEvalScale = d3.scale.linear()
+			.range([this._height, 0])
 			.domain([-5, 5])
 			.clamp(true)
 		;
 
-		this.yTimeScale = d3.scale.linear()
-			.range([this.height, 0])
+		this._yTimeScale = d3.scale.linear()
+			.range([this._height, 0])
 		;
 
 		//axes
-		this.xAxis = d3.svg.axis()
-			.scale(this.xScale)
+		this._xAxis = d3.svg.axis()
+			.scale(this._xScale)
 			.orient('top')
 			.tickFormat((d) => d + 1)
 		;
 
-		this.yEvalAxis = d3.svg.axis()
-			.scale(this.yEvalScale)
+		this._yEvalAxis = d3.svg.axis()
+			.scale(this._yEvalScale)
 			.orient('left')
 		;
 
-		this.yTimeAxis = d3.svg.axis()
-			.scale(this.yTimeScale)
+		this._yTimeAxis = d3.svg.axis()
+			.scale(this._yTimeScale)
 			.orient('right')
 			.tickFormat(d => Math.abs(d))
 		;
@@ -96,56 +92,26 @@ export class EvalAndTime {
 		//clear element
 		this.container.selectAll('*').remove();
 
-		//player pane
-		let playerInfo = this.container
-			.append('div')
-				.attr('class', 'player-info')
-		;
-
-		playerInfo
-			.append('div')
-				.attr('class', 'player-white')
-				.selectAll('div').data(['image', 'name', 'rating']).enter()
-				.append('div')
-					.attr('class', (d) => `player-${d}`)
-		;
-
-		playerInfo.append('div')
-			.attr('class', 'player-result')
-		;
-
-		playerInfo
-			.append('div')
-				.attr('class', 'player-black')
-				.selectAll('div').data(['image', 'name', 'rating']).enter()
-				.append('div')
-					.attr('class', (d) => `player-${d}`)
-		;
-
-		playerInfo.selectAll('.player-image')
-			.append('img')
-		;
-
 		//root of the graph
 		let root = this.container.append('svg')
 			.attr('class', 'graph')
-			.attr('width', this.width + this.options.margin.left + this.options.margin.right)
-			.attr('height', this.height + this.options.margin.top + this.options.margin.bottom)
+			.attr('width', this._width + this._options.margin.left + this._options.margin.right)
+			.attr('height', this._height + this._options.margin.top + this._options.margin.bottom)
 		;
 
 		//margins applied
 		let svg = root.append('g')
-			.attr('transform', 'translate(' + this.options.margin.left + ',' + this.options.margin.top + ')')
+			.attr('transform', 'translate(' + this._options.margin.left + ',' + this._options.margin.top + ')')
 		;
 
 		//xAxis
 		svg
 			.append('g')
 				.attr('class', 'axis x')
-				.call(this.xAxis)
+				.call(this._xAxis)
 			.append('text')
 				.attr('text-anchor', 'middle')
-				.attr('transform', 'translate(' + this.width / 2 + ',-25)')
+				.attr('transform', 'translate(' + this._width / 2 + ',-25)')
 				.text('moves (ply)')
 				.attr('class', 'axis-label')
 		;
@@ -154,10 +120,10 @@ export class EvalAndTime {
 		svg
 			.append('g')
 				.attr('class', 'axis yEval')
-				.call(this.yEvalAxis)
+				.call(this._yEvalAxis)
 			.append('text')
 				.attr('text-anchor', 'middle')
-				.attr('transform', 'rotate(-90) translate(' + -this.yEvalScale(0) + ',-25)')
+				.attr('transform', 'rotate(-90) translate(' + -this._yEvalScale(0) + ',-25)')
 				.text('area: evaluation (pawns)')
 				.attr('class', 'axis-label')
 		;
@@ -166,11 +132,11 @@ export class EvalAndTime {
 		svg
 			.append('g')
 				.attr('class', 'axis yTime')
-				.attr('transform', 'translate(' + this.width + ',0)')
-				.call(this.yTimeAxis)
+				.attr('transform', 'translate(' + this._width + ',0)')
+				.call(this._yTimeAxis)
 			.append('text')
 				.attr('text-anchor', 'middle')
-				.attr('transform', 'rotate(-90) translate(' + -this.yEvalScale(0) + ',35)')
+				.attr('transform', 'rotate(-90) translate(' + -this._yEvalScale(0) + ',35)')
 				.text('bars: move time (minutes)')
 				.attr('class', 'axis-label')
 		;
@@ -202,9 +168,9 @@ export class EvalAndTime {
 			.data(evalGuideLines).enter()
 				.append('line')
 					.attr('x1', 0)
-					.attr('y1', d => this.yEvalScale(d))
-					.attr('x2', this.width)
-					.attr('y2', d => this.yEvalScale(d))
+					.attr('y1', d => this._yEvalScale(d))
+					.attr('x2', this._width)
+					.attr('y2', d => this._yEvalScale(d))
 					.attr('class', 'eval-guide-line')
 		;
 
@@ -213,7 +179,7 @@ export class EvalAndTime {
 				.append('text')
 					.attr('transform', d => {
 						let offset = d.dy ? d.dy : 0;
-						return 'translate(5,' + (this.yEvalScale(d.y) + offset) + ')';
+						return 'translate(5,' + (this._yEvalScale(d.y) + offset) + ')';
 					})
 					.text(d => d.text)
 					.attr('class', 'eval-guide-text')
@@ -228,16 +194,16 @@ export class EvalAndTime {
 		svg.append('clipPath')
 			.attr('id', 'clip-white')
 		.append('rect')
-			.attr('width', this.width)
-			.attr('height', this.height / 2)
+			.attr('width', this._width)
+			.attr('height', this._height / 2)
 		;
 
 		svg.append('clipPath')
 			.attr('id', 'clip-black')
 		.append('rect')
-			.attr('y', this.height / 2)
-			.attr('width', this.width)
-			.attr('height', this.height / 2)
+			.attr('y', this._height / 2)
+			.attr('width', this._width)
+			.attr('height', this._height / 2)
 		;
 
 		//lines group
@@ -268,26 +234,29 @@ export class EvalAndTime {
 
 		//invisible rect to absorb mouse move events
 		interactiveLayer.append('rect')
-			.attr('width', this.width)
-			.attr('height', this.height)
+			.attr('width', this._width)
+			.attr('height', this._height)
 			.attr('pointer-events', 'all')
 			.attr('class', 'mouse-absorb')
+			.on('mouseenter', () => {
+				this.dispatch.mouseenter();
+			})
 			.on('mousemove', function () {
 				/*eslint no-empty: 0*/
 
 				//disregard if options.interactive is off
-				if( ! self.options.interactive ) return;
+				if( ! self._options.interactive ) return;
 
 				//calculate which point index the mouse is on
 				let mouseX = d3.mouse(this)[0];
-				let leftEdges = self.xScale.range();
-				let width = self.xScale.rangeBand();
+				let leftEdges = self._xScale.range();
+				let width = self._xScale.rangeBand();
 				let j;
 				for(j=0; mouseX > (leftEdges[j] + width); j++) {}
 
 				//convert it to the range on screen
-				let xPoint = self.xScale.domain()[j];
-				let xPosition = self.xScale(xPoint) + (self.xScale.rangeBand() / 2);
+				let xPoint = self._xScale.domain()[j];
+				let xPosition = self._xScale(xPoint) + (self._xScale.rangeBand() / 2);
 
 				if( ! xPosition ) return;
 
@@ -297,84 +266,110 @@ export class EvalAndTime {
 					.attr('x1', xPosition)
 					.attr('x2', xPosition)
 					.attr('y1', -6)
-					.attr('y2', self.height)
+					.attr('y2', self._height)
 				;
 
 				//draw yEval guide
-				let yPosition = self.yEvalScale(self.game.notation[xPoint].score);
+				let yPosition = self._yEvalScale(self._data[xPoint].score);
 
 				interactiveLayer.select('.yEval-guide')
 					.classed('hidden', false)
 					.attr('x1', -6)
 					.attr('x2', xPosition)
 					.transition().duration(100)
-					.attr('y1', yPosition)
-					.attr('y2', yPosition)
+						.attr('y1', yPosition)
+						.attr('y2', yPosition)
 				;
 
 				//draw yTime guide
-				yPosition = self.yTimeScale(self.game.notation[xPoint].time);
+				yPosition = self._yTimeScale(self._data[xPoint].time);
 
 				interactiveLayer.select('.yTime-guide')
 					.classed('hidden', false)
 					.attr('x1', xPosition)
-					.attr('x2', self.width + 6)
+					.attr('x2', self._width + 6)
 					.transition().duration(100)
-					.attr('y1', yPosition)
-					.attr('y2', yPosition)
+						.attr('y1', yPosition)
+						.attr('y2', yPosition)
 				;
-			})
-			.on('mouseout', function () {
-				//disregard if options.interactive is off
-				if( ! self.options.interactive ) return;
 
-				//hide guidelines on mouseout
+				self.dispatch.mousemove(self._data[xPoint]);
+			})
+			.on('mouseleave', function () {
+				//disregard if options.interactive is off
+				if( ! self._options.interactive ) return;
+
+				//hide guidelines on mouseleave
 				interactiveLayer.selectAll('.interactive-layer .guide')
-					.classed('hidden', true);
+					.classed('hidden', true)
+				;
+
+				self.dispatch.mouseleave();
 			})
 		;
 	}
 
-	update(game) {
-		this.game = game;
+	data(data) {
+		this._data = data;
 
+		this.update();
+	}
+
+	options(options) {
+		let omit = [
+			'width',
+			'margin',
+			'boardWidth',
+			'squareWidth'
+		];
+
+		_.merge(this._options, _.omit(options, omit));
+
+		if( _.isArray(this._options.colorScale) ) {
+			this._scale.color.range(this._options.colorScale);
+		}
+
+		this.update();
+	}
+
+	update() {
 		//set scale domains
-		this.xScale.domain(d3.range(this.game.notation.length));
+		this._xScale.domain(d3.range(this._data.length));
 
 		let y2max = d3.max(
-			d3.extent(this.game.notation, d => d.time).map(Math.abs)
+			d3.extent(this._data, d => d.time).map(Math.abs)
 		);
-		this.yTimeScale.domain([-y2max, y2max]);
+		this._yTimeScale.domain([-y2max, y2max]);
 
 		//only show every 10th move tick on x-axis
-		this.xAxis.tickValues(
-			this.xScale.domain().filter((d, i) => i == 0 || ! ((i + 1) % 10))
+		this._xAxis.tickValues(
+			this._xScale.domain().filter((d, i) => i == 0 || ! ((i + 1) % 10))
 		);
 
 		//line generator
 		let line = d3.svg.line()
-			.x((d, i) => this.xScale(i) + (this.xScale.rangeBand() / 2))
-			.y((d) => this.yEvalScale(d.score))
+			.x((d, i) => this._xScale(i) + (this._xScale.rangeBand() / 2))
+			.y((d) => this._yEvalScale(d.score))
 		;
 
 		//area generator
 		let area = d3.svg.area()
 			.x(line.x())
 			.y1(line.y())
-			.y0(this.yEvalScale(0))
+			.y0(this._yEvalScale(0))
 		;
 
 		//axes
 		let axes = this.container.transition();
 
 		axes.select('g.axis.x')
-			.call(this.xAxis)
+			.call(this._xAxis)
 		;
 		axes.select('g.axis.yTime')
-			.call(this.yTimeAxis)
+			.call(this._yTimeAxis)
 		;
 		axes.select('g.axis.yEval')
-			.call(this.yEvalAxis)
+			.call(this._yEvalAxis)
 		;
 
 		//bars
@@ -382,34 +377,34 @@ export class EvalAndTime {
 		//join
 		let bars = this.container.select('.bars')
 			.selectAll('.bar')
-			.data(this.game.notation)
+			.data(this._data)
 		;
 
 		//enter
 		bars.enter()
 			.append('rect')
 				.attr('height', 0)
-				.attr('y', this.yTimeScale(0))
+				.attr('y', this._yTimeScale(0))
 		;
 
 		//update + enter
 		bars
 			.transition()
-			.delay((d, i) => i / this.xScale.domain().length * 500)
-			.attr('x',(d, i) => this.xScale(i))
-			.attr('width', this.xScale.rangeBand())
+			.delay((d, i) => i / this._xScale.domain().length * 500)
+			.attr('x',(d, i) => this._xScale(i))
+			.attr('width', this._xScale.rangeBand())
 			.attr('y', d => {
 				if( d.time > 0 ) {
-					return this.yTimeScale(d.time);
+					return this._yTimeScale(d.time);
 				} else {
-					return this.yTimeScale(0);
+					return this._yTimeScale(0);
 				}
 			})
 			.attr('height', d => {
 				if( d.time > 0 ) {
-					return this.yTimeScale(0) - this.yTimeScale(d.time);
+					return this._yTimeScale(0) - this._yTimeScale(d.time);
 				} else {
-					return this.yTimeScale(d.time) - this.yTimeScale(0); 
+					return this._yTimeScale(d.time) - this._yTimeScale(0); 
 				}
 			})
 			.attr('class', (d, i) => 'bar ' + (i % 2 ? 'black' : 'white'))
@@ -418,7 +413,7 @@ export class EvalAndTime {
 		//exit
 		bars.exit()
 			.transition()
-			.delay((d, i) => i / this.xScale.domain().length * 500)
+			.delay((d, i) => i / this._xScale.domain().length * 500)
 			.attr('height', 0)
 			.remove()
 		;
@@ -434,13 +429,13 @@ export class EvalAndTime {
 			.append('path')
 				.attr('class', (d) => `line ${d}`)
 				.attr('clip-path', (d) => `url(#clip-${d})`)
-				.datum(this.game.notation)
+				.datum(this._data)
 				.attr('d', line)
 		;
 
 		//update + enter
 		lines
-			.datum(this.game.notation)
+			.datum(this._data)
 			.transition()
 			.attr('d', line)
 		;
@@ -456,31 +451,15 @@ export class EvalAndTime {
 			.append('path')
 				.attr('class', (d) => `area ${d}`)
 				.attr('clip-path', (d) => `url(#clip-${d})`)
-				.datum(this.game.notation)
+				.datum(this._data)
 				.attr('d', area)
 		;
 
 		//update + enter
 		areas
-			.datum(this.game.notation)
+			.datum(this._data)
 			.transition()
 			.attr('d', area)
 		;
-
-		this.updatePlayers();
-	}
-
-	updatePlayers() {
-		let playerInfo = this.container.select('.player-info');
-
-		playerInfo.select('.player-white .player-name').text(this.game.white);
-		playerInfo.select('.player-white .player-rating').text(this.game.whiteElo);
-		playerInfo.select('.player-white .player-image img').attr('src', '/' + this.game.whiteImg);
-
-		playerInfo.select('.player-black .player-name').text(this.game.black);
-		playerInfo.select('.player-black .player-rating').text(this.game.blackElo);
-		playerInfo.select('.player-black .player-image img').attr('src', '/' + this.game.blackImg);
-
-		playerInfo.select('.player-result').text(this.game.winner);
 	}
 }
