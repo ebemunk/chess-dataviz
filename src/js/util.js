@@ -29,15 +29,11 @@ function parseScore(move) {
 	return score;
 }
 
-export function parseGameNotation(game) {
-	let parsedGame = JSON.parse(JSON.stringify(game));
+export function parseGameNotation(notation) {
+	notation.map((move, i) => move.time = parseMinutes(move, i));
+	notation.map((move) => move.score = parseScore(move));
 
-	parsedGame.notation.map((move, i) => move.time = parseMinutes(move, i));
-	parsedGame.notation.map((move) => move.score = parseScore(move));
-
-	// let winner = parsedGame.winner == 'draw' ? 'draw' : parsedGame.winner + ' wins';
-
-	return parsedGame;
+	return notation;
 }
 
 function boardSquares() {
