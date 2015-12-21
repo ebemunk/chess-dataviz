@@ -19,7 +19,7 @@ You should include `ChessDataViz[.min].js` and `ChessDataViz[.min].css` files. A
 
 # Use / Demo
 
-Please see SITE_HERE for docs, usage instructions and demos.
+Please see http://ebemunk.github.io/chess-dataviz/ for docs, usage instructions and demos.
 
 # License
 MIT
