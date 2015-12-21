@@ -12,4 +12,4 @@ export var ChessDataViz = {
 	util
 };
 
-window.CG = ChessDataViz;
+window.ChessDataViz = ChessDataViz;
