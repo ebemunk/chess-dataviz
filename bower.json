@@ -1,0 +1,31 @@
+{
+  "name": "chess-dataviz",
+  "description": "chess visualization library written for d3.js",
+  "main": [
+    "dist/ChessDataViz.min.js",
+    "dist/ChessDataViz.min.css"
+  ],
+  "authors": [
+    "ebemunk <ebemunk@gmail.com>"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "chess",
+    "data",
+    "visualization",
+    "chessboard",
+    "d3"
+  ],
+  "homepage": "https://github.com/ebemunk/chess-dataviz",
+  "moduleType": [
+    "es6",
+    "globals"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
