@@ -1,3 +1,7 @@
+body {
+	position: relative;
+}
+
 .row {
 	display: flex;
 }
@@ -33,6 +37,40 @@ table td {
 .menu a:hover {
 	color: #1EAEDB;
 }
+.menu h4 {
+	margin-bottom: 0;
+}
 .menu h6 {
 	margin-bottom: 0;
+}
+
+.main-nav {
+	display: inline-block;
+	z-index: 99;
+}
+.main-nav li {
+	list-style-type: none;
+	display: block;
+	float: right;
+	background: white;
+	margin-bottom: 0;
+}
+.main-nav li a {
+	margin-bottom: 0;
+}
+
+.caption {
+	width: 80%;
+	margin: auto;
+	font-style: italic;
+	text-align: center;
+}
+
+.cdv-heatmap {
+	text-align: center;
+}
+
+.d3-tip {
+	pointer-events: none;
+	font-size: 1.2em;
 }

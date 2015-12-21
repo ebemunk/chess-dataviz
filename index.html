@@ -10,9 +10,10 @@
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
 		<link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
+		<link rel="stylesheet" href="vendor/json-formatter.css">
 
 		<link rel="stylesheet" href="style.css">
-		<link rel="stylesheet" href="vendor/json-formatter.css">
+		<link rel="stylesheet" href="vendor/ChessDataViz.min.css">
 	</head>
 	<body>
 		<div class="container" id="top">
@@ -20,8 +21,8 @@
 				<div class="twelve columns">
 					<h1>chess-dataviz <small>docs & demos</small></h1>
 					<h5>chess visualization library written for <a href="d3" target="_blank">D3.js</a></h5>
-					<a class="button" href="#"><i class="fa fa-github"></i> View on Github</a>
-					<a class="button" href="#"><i class="fa fa-download"></i> Download <small>(1.0.0)</small></a>
+					<a class="button button-primary" href="#"><i class="fa fa-github"></i> View on Github</a>
+					<a class="button button-primary" href="#"><i class="fa fa-download"></i> Download <small>(1.0.0)</small></a>
 				</div>
 			</div>
 
@@ -31,11 +32,11 @@
 				<div class="twelve columns">
 					<p>chess-dataviz is a visualization library for chess, written for D3. It has a number of visualizations to show statistics on games, such as:</p>
 
-					<ul>
-						<li>Heatmaps on a chess board</li>
-						<li>Openings, sunburst visualization</li>
-						<li>Move Paths on a chess board</li>
-						<li>Evaluation & Time graph</li>
+					<ul class="main-nav">
+						<li><a href="#evalandtime-top" class="button">Evaluation & Time</a></li>
+						<li><a href="#movepaths-top" class="button">Move Paths</a></li>
+						<li><a href="#openings-top" class="button">Openings</a></li>
+						<li><a href="#heatmap-top" class="button">Heatmap</a></li>
 					</ul>
 				</div>
 			</div>
@@ -56,11 +57,11 @@
 				</div>
 			</div>
 
-			<hr>
+			<hr id="heatmap-top">
 
-			<div class="row" id="heatmap-top">
+			<div class="row">
 				<div class="four columns flex">
-					<h3>Heatmap</h3>
+					<h3>HeatMap</h3>
 					<p>HeatMap visualization shows a chess board with squares overlaid to indicate how "hot" that square is. It's great for showing important squares, utilization, capture squares, etc. aggregated from thousands of games.</p>
 
 					<div class="menu-wrap">
@@ -100,6 +101,22 @@
 				<div class="eight columns">
 					<h3 id="heatmap-examples">Examples</h3>
 
+					<h4 id="heatmap-ex-1">Defaults</h4>
+					<div id="heatmap-example-1" class="cdv-heatmap"></div>
+					<div class="caption">World Rapid Chess Championship 2015, square utilization by white (how many times a piece landed on a square)</div>
+					<a class="slide-toggle" href="">Source</a>
+					<div class="slide">
+						<script src="https://gist.github.com/anonymous/1484613.js"></script>
+					</div>
+
+					<h4 id="heatmap-ex-2">Fancy</h4>
+					<div id="heatmap-example-2" class="cdv-heatmap"></div>
+					<div class="caption">World Rapid Chess Championship 2015, checking squares of queens (how many times a queen delivered a check on a square)<button class="button heatmap-example-2-w button-primary">White Queens</button><button class="button heatmap-example-2-b">Black Queens</button></div>
+					<a class="slide-toggle" href="">Source</a>
+					<div class="slide">
+						<script src="https://gist.github.com/anonymous/1484613.js"></script>
+					</div>
+
 					<h3 id="heatmap-methods">Methods</h3>
 
 					<h4 id="heatmap-constructor">constructor(selector, [<em>options</em>], [<em>data</em>])</h4>
@@ -124,7 +141,7 @@
 										<dd>total width of the svg element</dd>
 
 										<dt>margin</dt>
-										<dd>margins around the chess board, hence the total width of the chess board will be <code>width - margin</code></dd>
+										<dd>margins around the chess board, hence the total width of the chess board will be <code>width - 2 * margin</code></dd>
 
 										<dt>accessor</dt>
 										<dd>the accessor keys for piece and color. this will define what parts of the data is being shown on the heatmap. valid values:<br>
@@ -176,7 +193,7 @@
 					<h4 id="heatmap-mouseenter">mouseenter</h4>
 					<p>Will fire when mouse enters a heat square. The handler will be passed the current <code>data</code> (count) for the square.</p>
 
-					<h4 id="heatmap-mouseover">mousemove</h4>
+					<h4 id="heatmap-mousemove">mousemove</h4>
 					<p>Will fire when mouse moves around a heat square.</p>
 
 					<h4 id="heatmap-mouseleave">mouseleave</h4>
@@ -204,9 +221,9 @@
 				</div>
 			</div>
 
-			<hr>
+			<hr id="openings-top">
 
-			<div class="row" id="openings-top">
+			<div class="row">
 				<div class="four columns flex">
 					<h3>Openings</h3>
 					<p>Openings visualization is a sunburst graph which shows openings in a given set of games, with customizable properties and interactive hover events. It's great for getting an idea of most popular openings in a glance, and digging into variations without hassle.</p>
@@ -322,14 +339,14 @@
 					<h4 id="openings-mouseenter">mouseenter</h4>
 					<p>Will fire when mouse enters a heat square. The handler will be passed <code>(data, moves)</code> for the arc. <code>data</code> contains the data of the arc that is under the mouse, and <code>moves</code> will be an array of moves up until that point (e.g. <code>['e4', 'e5', 'Nf3', 'Nf6']</code> if you were on the Nf6 arc).</p>
 
-					<h4 id="openings-mouseover">mousemove</h4>
+					<h4 id="openings-mousemove">mousemove</h4>
 					<p>Will fire when mouse moves around an arc.</p>
 
 					<h4 id="openings-mouseleave">mouseleave</h4>
 					<p>Will fire when mouse leaves an arc.</p>
 
 					<h3 id="openings-css">CSS</h3>
-					<p>The CSS classes for styleable elements of the heatmap.</p>
+					<p>The CSS classes for styleable elements of the sunburst graph.</p>
 
 					<dl>
 						<dt>.arc</dt>
@@ -340,11 +357,309 @@
 					</dl>
 				</div>
 			</div>
+
+			<hr id="movepaths-top">
+
+			<div class="row">
+				<div class="four columns flex">
+					<h3>Move Paths</h3>
+					<p>Move Paths show the route that a particular piece takes through its life on the chess board. They are lines (quadratic bezier curves) that connect travelled squares together to give a sense of the piece's journey. It's a great way to see preferred moves, common manuevers and looks kinda pretty :)</p>
+
+					<div class="menu-wrap">
+						<div class="menu">
+							<h3><small>ChessDataViz.MovePaths()</small></h3>
+							<h4><a href="#movepaths-examples">Examples</a></h4>
+
+							<h4><a href="#movepaths-methods">Methods</a></h4>
+							<ul>
+								<li><a href="#movepaths-constructor">constructor</a></li>
+								<li><a href="#movepaths-data">data</a></li>
+								<li><a href="#movepaths-options">options</a></li>
+								<li><a href="#movepaths-update">update</a></li>
+							</ul>
+
+							<h4><a href="#movepaths-properties">Properties</a></h4>
+							<ul>
+								<li><a href="#movepaths-container">container</a></li>
+								<li><a href="#movepaths-dataContainer">dataContainer</a></li>
+							</ul>
+
+							<h4><a href="#movepaths-css">CSS</a></h4>
+
+							<h6><a href="#movepaths-top">Top</a></h6>
+							<h6><a href="#top">Top (all the way)</a></h6>
+						</div>
+					</div>
+				</div>
+				<div class="eight columns">
+					<h3 id="movepaths-examples">Examples</h3>
+
+					<h3 id="movepaths-methods">Methods</h3>
+
+					<h4 id="movepaths-constructor">constructor(selector, [<em>options</em>], [<em>data</em>])</h4>
+					<table class="u-full-width">
+						<thead>
+							<tr>
+								<th>argument</th>
+								<th>description</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>selector</td>
+								<td>DOM selector that you would pass to <code>d3.select()</code></td>
+							</tr>
+							<tr>
+								<td>options</td>
+								<td>options configuration object
+									<div data-render-json="movePathsConfig"></div>
+									<dl>
+										<dt>width</dt>
+										<dd>total width of the svg element</dd>
+
+										<dt>margin</dt>
+										<dd>margins around the chess board, hence the total width of the chess board will be <code>width - margin</code></dd>
+
+										<dt>accessor</dt>
+										<dd>the starting square of a piece, such as 'Nb1' or 'e2'.
+										</dd>
+
+										<dt>binSize</dt>
+										<dd>to aggregate moves over 'bins' in case there are many games involved. this determines the number of lines drawn per <code>binSize</code> moves. <strong>if you have data with many moves, you should set this to a high value, as it will affect performance</strong></dd>
+
+										<dt>pointRandomizer</dt>
+										<dd>a function which takes in the data point <code>{x: , y: }</code> and returns a randomized coordinate. this is used to fuzz start and end coordinates of the path.</dd>
+
+										<dt>bezierRandomizer</dt>
+										<dd>a function which takes in a point <code>{x: , y: }</code> and returns a randomized coordinate. this is used to fuzz the control point of the quadratic bezier curve of the path.</dd>
+
+										<dt>bezierScaleFactor</dt>
+										<dd>a number to scale the distance of the bezier control point.</dd>
+									</dl>
+								</td>
+							</tr>
+							<tr>
+								<td>data</td>
+								<td>data formatted as:
+									<div data-render-json="movePathsData"></div>
+									<p>The data is an object with keys containing all the pieces' starting points, where the key values are objects with keys of the format <code>{startSquare}-{endSquare}</code> e.g <code>e2-e4</code> and values as the counts (number of times that piece move along those squares).</p>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+
+					<h4 id="movepaths-data">data(data)</h4>
+					<p>Set or change the data of the graph. This method will automatically call <code>update()</code>. The data format needs to be the same as the one that the <code>constructor</code> accepts.</p>
+
+					<h4 id="movepaths-options">options(options)</h4>
+					<p>Change graph options. This method will automatically call <code>update()</code>. You can change all the options as described in <code>constructor</code> except <strong>width</strong> and <strong>margin</strong>.</p>
+
+					<h4 id="movepaths-update">update()</h4>
+					<p>Updates and re-draws the graph. You shouldn't need to call this under normal circumstances.</p>
+
+					<h3 id="movepaths-properties">Properties</h3>
+
+					<h4 id="movepaths-container">container</h4>
+					<p>Holds the reference to the DOM object containing the <code>&lt;svg></code> element. Same object as if you had called <code>d3.select(selector)</code>.</p>
+
+					<h4 id="movepaths-dataContainer">dataContainer</h4>
+					<p>Holds the reference to the <code>&lt;g></code> element containing the data elements</p>
+
+					<h3 id="movepaths-css">CSS</h3>
+					<p>The CSS classes for styleable elements of the board and paths.</p>
+
+					<dl>
+						<dt>.white rect</dt>
+						<dd>white chess board square</dd>
+
+						<dt>.white .label</dt>
+						<dd>white chess board square label (file or rank label)</dd>
+
+						<dt>.black rect</dt>
+						<dd>black chess board square</dd>
+
+						<dt>.black .label</dt>
+						<dd>black chess board square label (file or rank label)</dd>
+
+						<dt>.move-path</dt>
+						<dd><code>path</code> corresponding to a path line</dd>
+					</dl>
+				</div>
+			</div>
+
+			<hr id="evalandtime-top">
+
+			<div class="row">
+				<div class="four columns flex">
+					<h3>Eval and Time</h3>
+					<p>Eval and Time graph is a combination of a line graph representing evaluation per move, and a bar graph representing time spent per move. It gives great sense of how much time players spend on what parts of the game, and how this reflects on the evaluation of the position.</p>
+
+					<div class="menu-wrap">
+						<div class="menu">
+							<h3><small>ChessDataViz.EvalAndTime()</small></h3>
+							<h4><a href="#evalandtime-examples">Examples</a></h4>
+
+							<h4><a href="#evalandtime-methods">Methods</a></h4>
+							<ul>
+								<li><a href="#evalandtime-constructor">constructor</a></li>
+								<li><a href="#evalandtime-data">data</a></li>
+								<li><a href="#evalandtime-options">options</a></li>
+								<li><a href="#evalandtime-update">update</a></li>
+							</ul>
+
+							<h4><a href="#evalandtime-properties">Properties</a></h4>
+							<ul>
+								<li><a href="#evalandtime-container">container</a></li>
+								<li><a href="#evalandtime-dispatch">dispatch</a></li>
+							</ul>
+
+							<h4><a href="#evalandtime-events">Events</a></h4>
+							<ul>
+								<li><a href="#evalandtime-mouseenter">mouseenter</a></li>
+								<li><a href="#evalandtime-mousemove">mousemove</a></li>
+								<li><a href="#evalandtime-mouseleave">mouseleave</a></li>
+							</ul>
+
+							<h4><a href="#evalandtime-css">CSS</a></h4>
+
+							<h6><a href="#evalandtime-top">Top</a></h6>
+							<h6><a href="#top">Top (all the way)</a></h6>
+						</div>
+					</div>
+				</div>
+				<div class="eight columns">
+					<h3 id="evalandtime-examples">Examples</h3>
+
+					<h3 id="evalandtime-methods">Methods</h3>
+
+					<h4 id="evalandtime-constructor">constructor(selector, [<em>options</em>], [<em>data</em>])</h4>
+					<table class="u-full-width">
+						<thead>
+							<tr>
+								<th>argument</th>
+								<th>description</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>selector</td>
+								<td>DOM selector that you would pass to <code>d3.select()</code></td>
+							</tr>
+							<tr>
+								<td>options</td>
+								<td>options configuration object
+									<div data-render-json="evalAndTimeConfig"></div>
+									<dl>
+										<dt>width</dt>
+										<dd>total width of the svg element</dd>
+
+										<dt>height</dt>
+										<dd>total height of the svg element</dd>
+
+										<dt>margin</dt>
+										<dd>a margin object of the form <code>{top, right, bottom, left}</code> describing the margins to apply to each side</dd>
+
+										<dt>interactive</dt>
+										<dd>toggle for enabling interactive mode, where mousemove events cause x and y axis guide lines to move</dd>
+									</dl>
+								</td>
+							</tr>
+							<tr>
+								<td>data</td>
+								<td>data formatted as:
+									<div data-render-json="evalAndTimeData"></div>
+									<p>The data format is an array of objects describing the moves as <code>{move, score, time}</code>. note that <code>score</code> and <code>time</code> should be numbers and <strong>not strings</strong></p>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+
+					<h4 id="evalandtime-data">data(data)</h4>
+					<p>Set or change the data of the graph. This method will automatically call <code>update()</code>. The data format needs to be the same as the one that the <code>constructor</code> accepts.</p>
+
+					<h4 id="evalandtime-options">options(options)</h4>
+					<p>Change graph options. This method will automatically call <code>update()</code>. You can change all the options as described in <code>constructor</code> except <strong>width</strong>, <strong>height</strong> and <strong>margin</strong>.</p>
+
+					<h4 id="evalandtime-update">update()</h4>
+					<p>Updates and re-draws the graph. You shouldn't need to call this under normal circumstances.</p>
+
+					<h3 id="evalandtime-properties">Properties</h3>
+
+					<h4 id="evalandtime-container">container</h4>
+					<p>Holds the reference to the DOM object containing the <code>&lt;svg></code> element. Same object as if you had called <code>d3.select(selector)</code>.</p>
+
+					<h4 id="evalandtime-dispatch">dispatch</h4>
+					<p>d3 event dispatcher. You can hook your event handler to this property to listen to graph events.</p>
+
+					<h3 id="evalandtime-events">Events</h3>
+					<p>The events are dispatched via <code>this.dispatch</code>.</p>
+
+					<h4 id="evalandtime-mouseenter">mouseenter</h4>
+					<p>Will fire when mouse enters the graph area.</p>
+
+					<h4 id="evalandtime-mousemove">mousemove</h4>
+					<p>Will fire when mouse moves around on the graph, passing the current data point to the handler.</p>
+
+					<h4 id="evalandtime-mouseleave">mouseleave</h4>
+					<p>Will fire when mouse leaves the graph.</p>
+
+					<h3 id="evalandtime-css">CSS</h3>
+					<p>The CSS classes for styleable elements of the graph.</p>
+
+					<dl>
+						<dt>.graph</dt>
+						<dd>graph wrapper</dd>
+
+						<dt>.axis</dt>
+						<dd>styles for x and y axes</dd>
+
+						<dt>.axis-label</dt>
+						<dd>styles for x and y axis labels</dd>
+
+						<dt>.bar</dt>
+						<dd>bars for the black player</dd>
+
+						<dt>.bar.white</dt>
+						<dd>bars for the white player</dd>
+
+						<dt>.line</dt>
+						<dd>lines for the black player</dd>
+
+						<dt>.line.white</dt>
+						<dd>lines for the white player</dd>
+
+						<dt>.area</dt>
+						<dd>area above the line for the black player</dd>
+
+						<dt>.area.white</dt>
+						<dd>area under the line for the white player</dd>
+
+						<dt>.eval-guides</dt>
+						<dd>evaluation marker lines on the graph</dd>
+
+						<dt>.eval-guide-line</dt>
+						<dd>evaluation marker line paths on the graph</dd>
+
+						<dt>.eval-guide-text</dt>
+						<dd>evaluation marker text on the graph</dd>
+
+						<dt>.interactive-layer.guide</dt>
+						<dd>the interactive guidelines</dd>
+
+						<dt>.interactive-layer.guide.hidden</dt>
+						<dd>the interactive guidelines when they are hidden</dd>
+					</dl>
+				</div>
+			</div>
 		</div>
 
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.sticky/1.0.3/jquery.sticky.min.js"></script>
 		<script src="http://yckart.github.io/jquery.fixer.js/jquery.fixer.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.12/d3.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.6.7/d3-tip.min.js"></script>
 		<script src="vendor/json-formatter.js"></script>
+		<script src="vendor/ChessDataViz.min.js"></script>
 
 		<script>
 			var jsons = {
@@ -366,19 +681,97 @@
 					arcThreshold: 0.01,
 					textThreshold: 0.1
 				},
-				openingsData: {"openings":{"san":"start","children":[{"san":"d4","count":750504,"children":[{"san":"Nf6","count":435756,"children":[]},{"san":"e6","count":34034,"children":[]}]},{"san":"c4","count":154518,"children":[]}]}}
+				openingsData: {"san":"start","children":[{"san":"d4","count":750504,"children":[{"san":"Nf6","count":435756,"children":[]},{"san":"e6","count":34034,"children":[]}]},{"san":"c4","count":154518,"children":[]}]},
+				movePathsConfig: {
+					width: 500,
+					margin: 20,
+					accessor: 'Nb1',
+					binSize: 1,
+					pointRandomizer: 'd3.random.normal(3, 1)',
+					bezierRandomizer: 'd3.random.normal(12, 4)',
+					bezierScaleFactor: 2
+				},
+				movePathsData: {"Nb1":{"b1-c3":884,"c3-a4":99,"a4-b6":32,"c3-d5":232,"d5-c7":12,"c7-e6":6,"b1-d2":268},"e2":{"e2-e4":722,"e2-e3":391,"e3-f4":25,"f4-f5":7,"e4-d5":189}},
+				evalAndTimeConfig: {
+					width: 960,
+					height: 500,
+					margin: {
+						top: 40,
+						right: 40,
+						bottom: 20,
+						left: 40
+					},
+					interactive: true
+				},
+				evalAndTimeData: [{"move":"d4","score":0.19,"time":3},{"move":"Nf6","score":0.23,"time":5},{"move":"c4","score":0.15,"time":13},{"move":"g6","score":0.43,"time":4}]
 			};
 
 			$(function () {
 				$('div[data-render-json]').each(function () {
 					var el = $(this);
 					var key = el.data('render-json');
-					// this.innerHTML = JSON.stringify(jsons[key], undefined, 4);
 					var jsonFormatter = new JSONFormatter(jsons[key], 2);
 					el.append(jsonFormatter.render());
 				});
 
 				$('.menu').fixer();
+				$('.main-nav').sticky({topSpacing: 0});
+
+				$('.slide').slideToggle();
+				$('.slide-toggle').on('click', function (e) {
+					e.preventDefault();
+					$(this).next().slideToggle();
+				});
+			});
+
+			d3.json('/data/wrc.json', function (err, data) {
+				var heatmapExample1 = new ChessDataViz.HeatMap('#heatmap-example-1', null, data.heatmaps.squareUtilization);
+
+				var heatmapExample2 = new ChessDataViz.HeatMap('#heatmap-example-2', {
+					colorScale: ['cyan', 'gold'],
+					sizeScale: false,
+					accessor: {
+						color: 'w',
+						piece: 'q'
+					}
+				}, data.heatmaps.checkSquares);
+
+				var tip = d3.tip()
+					.attr('class', 'd3-tip')
+					.offset([25, -6])
+					.html(function(d) {
+						return d;
+					})
+				;
+
+				heatmapExample2.dispatch.on('mouseenter', tip.show);
+				heatmapExample2.dispatch.on('mouseleave', tip.hide);
+				heatmapExample2.dataContainer.call(tip);
+
+				$('.heatmap-example-2-w').on('click', function () {
+					heatmapExample2.options({
+						accessor: {
+							color: 'w',
+							piece: 'q'
+						}
+					});
+
+					$(this).addClass('button-primary');
+					$('.heatmap-example-2-b').removeClass('button-primary');
+				});
+
+				$('.heatmap-example-2-b').on('click', function () {
+					heatmapExample2.options({
+						accessor: {
+							color: 'b',
+							piece: 'q'
+						}
+					});
+
+					$(this).addClass('button-primary');
+					$('.heatmap-example-2-w').removeClass('button-primary');
+				});
+
 			});
 		</script>
 	</body>
