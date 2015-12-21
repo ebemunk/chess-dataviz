@@ -78,3 +78,8 @@ table td {
 .plunker-embed {
 	width: 100%;
 }
+
+.heading .fa {
+	font-size: 2.2em;
+	vertical-align: middle;
+}
