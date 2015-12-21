@@ -11,9 +11,7 @@
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
 		<link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
 		<link rel="stylesheet" href="vendor/json-formatter.css">
-
 		<link rel="stylesheet" href="style.css">
-		<link rel="stylesheet" href="vendor/ChessDataViz.min.css">
 	</head>
 	<body>
 		<div class="container" id="top">
@@ -30,7 +28,7 @@
 
 			<div class="row">
 				<div class="twelve columns">
-					<p>chess-dataviz is a visualization library for chess, written for D3. It has a number of visualizations to show statistics on games, such as:</p>
+					<p>chess-dataviz is a visualization library for chess, written for D3. It has a number of visualizations to show statistics on games, and plays nicely with other D3 plugins.</p>
 
 					<ul class="main-nav">
 						<li><a href="#evalandtime-top" class="button">Evaluation & Time</a></li>
@@ -102,20 +100,12 @@
 					<h3 id="heatmap-examples">Examples</h3>
 
 					<h4 id="heatmap-ex-1">Defaults</h4>
-					<div id="heatmap-example-1" class="cdv-heatmap"></div>
-					<div class="caption">World Rapid Chess Championship 2015, square utilization by white (how many times a piece landed on a square)</div>
-					<a class="slide-toggle" href="">Source</a>
-					<div class="slide">
-						<script src="https://gist.github.com/anonymous/1484613.js"></script>
-					</div>
+					<p>Default options with some data.</p>
+					<iframe class="plunker-embed" style="height: 650px;" src="http://embed.plnkr.co/Lc8B70W2kqaXLNETzbvD" frameborder="0"></iframe>
 
 					<h4 id="heatmap-ex-2">Fancy</h4>
-					<div id="heatmap-example-2" class="cdv-heatmap"></div>
-					<div class="caption">World Rapid Chess Championship 2015, checking squares of queens (how many times a queen delivered a check on a square)<button class="button heatmap-example-2-w button-primary">White Queens</button><button class="button heatmap-example-2-b">Black Queens</button></div>
-					<a class="slide-toggle" href="">Source</a>
-					<div class="slide">
-						<script src="https://gist.github.com/anonymous/1484613.js"></script>
-					</div>
+					<p>Dynamic data update, custom color scaling and d3.tip integration.</p>
+					<iframe class="plunker-embed" style="height: 700px;" src="http://embed.plnkr.co/YsUw1HhDDJiS2zTCpXNP" frameborder="0"></iframe>
 
 					<h3 id="heatmap-methods">Methods</h3>
 
@@ -265,6 +255,10 @@
 				<div class="eight columns">
 					<h3 id="openings-examples">Examples</h3>
 
+					<h4 id="openings-ex-1">Defaults</h4>
+					<p>Default options with some data.</p>
+					<iframe width="100%" height="600" src="//jsfiddle.net/ebemunk/fqfn2r6g/embedded/result,html,js" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
 					<h3 id="openings-methods">Methods</h3>
 
 					<h4 id="openings-constructor">constructor(selector, [<em>options</em>], [<em>data</em>])</h4>
@@ -292,7 +286,7 @@
 										<dd>total height of the svg element</dd>
 
 										<dt>colors</dt>
-										<dd>an array of colors for the different segments of the sunburst graph. every first move will get a color, and its variations will be darkened/lightened by move number and color to move.
+										<dd>an ordinal scale of colors for the different segments of the sunburst graph. every first move will get a color, and its variations will be darkened/lightened by move number and color to move.
 										</dd>
 
 										<dt>arcThreshold</dt>
@@ -656,10 +650,7 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.sticky/1.0.3/jquery.sticky.min.js"></script>
 		<script src="http://yckart.github.io/jquery.fixer.js/jquery.fixer.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.12/d3.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.6.7/d3-tip.min.js"></script>
 		<script src="vendor/json-formatter.js"></script>
-		<script src="vendor/ChessDataViz.min.js"></script>
 
 		<script>
 			var jsons = {
@@ -722,56 +713,6 @@
 					e.preventDefault();
 					$(this).next().slideToggle();
 				});
-			});
-
-			d3.json('/data/wrc.json', function (err, data) {
-				var heatmapExample1 = new ChessDataViz.HeatMap('#heatmap-example-1', null, data.heatmaps.squareUtilization);
-
-				var heatmapExample2 = new ChessDataViz.HeatMap('#heatmap-example-2', {
-					colorScale: ['cyan', 'gold'],
-					sizeScale: false,
-					accessor: {
-						color: 'w',
-						piece: 'q'
-					}
-				}, data.heatmaps.checkSquares);
-
-				var tip = d3.tip()
-					.attr('class', 'd3-tip')
-					.offset([25, -6])
-					.html(function(d) {
-						return d;
-					})
-				;
-
-				heatmapExample2.dispatch.on('mouseenter', tip.show);
-				heatmapExample2.dispatch.on('mouseleave', tip.hide);
-				heatmapExample2.dataContainer.call(tip);
-
-				$('.heatmap-example-2-w').on('click', function () {
-					heatmapExample2.options({
-						accessor: {
-							color: 'w',
-							piece: 'q'
-						}
-					});
-
-					$(this).addClass('button-primary');
-					$('.heatmap-example-2-b').removeClass('button-primary');
-				});
-
-				$('.heatmap-example-2-b').on('click', function () {
-					heatmapExample2.options({
-						accessor: {
-							color: 'b',
-							piece: 'q'
-						}
-					});
-
-					$(this).addClass('button-primary');
-					$('.heatmap-example-2-w').removeClass('button-primary');
-				});
-
 			});
 		</script>
 	</body>
