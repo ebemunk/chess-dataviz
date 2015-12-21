@@ -83,3 +83,20 @@ table td {
 	font-size: 2.2em;
 	vertical-align: middle;
 }
+
+.credits p {
+	margin-bottom: 0;
+}
+.credits ul:last-of-type {
+	margin-bottom: 0;
+}
+.credits li {
+	margin-bottom: 0;
+}
+
+.footer {
+	color: darkgray;
+}
+.footer p {
+	margin: 0;
+}
