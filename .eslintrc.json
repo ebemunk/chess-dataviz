@@ -8,10 +8,7 @@
             2,
             "single"
         ],
-        "linebreak-style": [
-            2,
-            "windows"
-        ],
+        "linebreak-style": 0,
         "semi": [
             2,
             "always"
