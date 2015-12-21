@@ -1,0 +1,382 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="x-ua-compatible" content="ie=edge">
+		<title>chess-dataviz</title>
+		<meta name="description" content="Documentation and Demos for chess-dataviz">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
+		<link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
+
+		<link rel="stylesheet" href="style.css">
+		<link rel="stylesheet" href="vendor/json-formatter.css">
+	</head>
+	<body>
+		<div class="container">
+			<div class="row">
+				<div class="twelve columns">
+					<h1>chess-dataviz <small>docs & demos</small></h1>
+					<h5>chess visualization library written for <a href="d3" target="_blank">D3.js</a></h5>
+					<a class="button" href="#"><i class="fa fa-github"></i> View on Github</a>
+					<a class="button" href="#"><i class="fa fa-download"></i> Download <small>(1.0.0)</small></a>
+				</div>
+			</div>
+
+			<hr>
+
+			<div class="row">
+				<div class="twelve columns">
+					<p>chess-dataviz is a visualization library for chess, written for D3. It has a number of visualizations to show statistics on games, such as:</p>
+
+					<ul>
+						<li>Heatmaps on a chess board</li>
+						<li>Openings, sunburst visualization</li>
+						<li>Move Paths on a chess board</li>
+						<li>Evaluation & Time graph</li>
+					</ul>
+				</div>
+			</div>
+
+			<hr>
+
+			<div class="row">
+				<div class="four columns">
+					<h3>Getting started</h3>
+					<p>blabla</p>
+
+					<code>
+						$ bower install chess-dataviz
+					</code>
+				</div>
+				<div class="eight columns">
+					<script src="https://gist.github.com/anonymous/1484613.js"></script>
+				</div>
+			</div>
+
+			<hr>
+
+			<div class="row">
+				<div class="four columns">
+					<h3>Heatmap</h3>
+					<p>HeatMap visualization shows a chess board with squares overlaid to indicate how "hot" that square is. It's great for showing important squares, utilization, capture squares, etc. aggregated from thousands of games.</p>
+					<div class="menu">
+						<h3><small>ChessDataViz.HeatMap()</small></h3>
+						<h4>Examples</h4>
+
+						<h4>Methods</h4>
+						<ul>
+							<li>constructor</li>
+							<li>data</li>
+							<li>options</li>
+							<li>update</li>
+						</ul>
+
+						<h4>Properties</h4>
+						<ul>
+							<li>container</li>
+							<li>dataContainer</li>
+							<li>dispatch</li>
+						</ul>
+
+						<h4>Events</h4>
+						<ul>
+							<li>mouseenter</li>
+							<li>mousemove</li>
+							<li>mouseleave</li>
+						</ul>
+
+						<h4>CSS</h4>
+
+						<h6>Top</h6>
+					</div>
+				</div>
+				<div class="eight columns">
+					<h3>Methods</h3>
+
+					<h3>Methods</h3>
+
+					<h4>constructor(selector, [<em>options</em>], [<em>data</em>])</h4>
+					<table class="u-full-width">
+						<thead>
+							<tr>
+								<th>argument</th>
+								<th>description</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>selector</td>
+								<td>DOM selector that you would pass to <code>d3.select()</code></td>
+							</tr>
+							<tr>
+								<td>options</td>
+								<td>options configuration object
+									<div data-render-json="heatmapConfig"></div>
+									<dl>
+										<dt>width</dt>
+										<dd>total width of the svg element</dd>
+
+										<dt>margin</dt>
+										<dd>margins around the chess board, hence the total width of the chess board will be <code>width - margin</code></dd>
+
+										<dt>accessor</dt>
+										<dd>the accessor keys for piece and color. this will define what parts of the data is being shown on the heatmap. valid values:<br>
+											piece: <code>all, k, q, r, b, k, p</code><br>
+											color: <code>w, b</code>
+										</dd>
+
+										<dt>sizeScale</dt>
+										<dd>scale the size of the heatmap squares depending on the data value</dd>
+
+										<dt>colorScale</dt>
+										<dd>color the heatmap squares depending on the data value, optionally, you can pass an array of 2 colors to interpolate such as <code>['yellow', 'red']</code>. If set to true, but not supplied an array, the default interpolation is <code>['blue', 'red']</code>.</dd>
+									</dl>
+								</td>
+							</tr>
+							<tr>
+								<td>data</td>
+								<td>data formatted as:
+									<div data-render-json="heatmapData"></div>
+									<p>The data consists of an array of 64 elements (only 2 shown in the example above) representing the squares, from top-left to bottom-right in row order (<code>a8, b8, c8 ... ,f1, g1, h1</code>)</p>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+
+					<h4>data(data)</h4>
+					<p>Set or change the data of the graph. This method will automatically call <code>update()</code>. The data format needs to be the same as the one that the <code>constructor</code> accepts.</p>
+
+					<h4>options(options)</h4>
+					<p>Change graph options. This method will automatically call <code>update()</code>. You can change all the options as described in <code>constructor</code> except <strong>width</strong> and <strong>margin</strong>.</p>
+
+					<h4>update()</h4>
+					<p>Updates and re-draws the graph. You shouldn't need to call this under normal circumstances.</p>
+
+					<h3>Properties</h3>
+
+					<h4>container</h4>
+					<p>Holds the reference to the DOM object containing the <code>&lt;svg></code> element. Same object as if you had called <code>d3.select(selector)</code>.</p>
+
+					<h4>dataContainer</h4>
+					<p>Holds the reference to the <code>&lt;g></code> element containing the data elements</p>
+
+					<h4>dispatch</h4>
+					<p>d3 event dispatcher. You can hook your event handler to this property to listen to graph events.</p>
+
+					<h3>Events</h3>
+					<p>The events are dispatched via <code>this.dispatch</code>.</p>
+
+					<h4>mouseenter</h4>
+					<p>Will fire when mouse enters a heat square. The handler will be passed the current <code>data</code> (count) for the square.</p>
+
+					<h4>mousemove</h4>
+					<p>Will fire when mouse move around a heat square.</p>
+
+					<h4>mouseleave</h4>
+					<p>Will fire when mouse leaves a heat square.</p>
+
+					<h3>CSS</h3>
+					<p>The CSS classes for styleable elements of the heatmap.</p>
+
+					<dl>
+						<dt>.white rect</dt>
+						<dd>white chess board square</dd>
+
+						<dt>.white .label</dt>
+						<dd>white chess board square label (file or rank label)</dd>
+
+						<dt>.black rect</dt>
+						<dd>black chess board square</dd>
+
+						<dt>.black .label</dt>
+						<dd>black chess board square label (file or rank label)</dd>
+
+						<dt>.heat-square</dt>
+						<dd><code>rect</code> corresponding to a heat square</dd>
+					</dl>
+				</div>
+			</div>
+
+			<hr>
+
+			<div class="row">
+				<div class="four columns">
+					<h3>Heatmap</h3>
+					<p>HeatMap visualization shows a chess board with squares overlaid to indicate how "hot" that square is. It's great for showing important squares, utilization, capture squares, etc. aggregated from thousands of games.</p>
+					<div class="menu">
+						<h3><small>ChessDataViz.HeatMap()</small></h3>
+						<h4>Examples</h4>
+
+						<h4>Methods</h4>
+						<ul>
+							<li>constructor</li>
+							<li>data</li>
+							<li>options</li>
+							<li>update</li>
+						</ul>
+
+						<h4>Properties</h4>
+						<ul>
+							<li>container</li>
+							<li>dataContainer</li>
+							<li>dispatch</li>
+						</ul>
+
+						<h4>Events</h4>
+						<ul>
+							<li>mouseenter</li>
+							<li>mousemove</li>
+							<li>mouseleave</li>
+						</ul>
+
+						<h4>CSS</h4>
+
+						<h6>Top</h6>
+					</div>
+				</div>
+				<div class="eight columns">
+					<h3>Methods</h3>
+
+					<h3>Methods</h3>
+
+					<h4>constructor(selector, [<em>options</em>], [<em>data</em>])</h4>
+					<table class="u-full-width">
+						<thead>
+							<tr>
+								<th>argument</th>
+								<th>description</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>selector</td>
+								<td>DOM selector that you would pass to <code>d3.select()</code></td>
+							</tr>
+							<tr>
+								<td>options</td>
+								<td>options configuration object
+									<div data-render-json="heatmapConfig"></div>
+									<dl>
+										<dt>width</dt>
+										<dd>total width of the svg element</dd>
+
+										<dt>margin</dt>
+										<dd>margins around the chess board, hence the total width of the chess board will be <code>width - margin</code></dd>
+
+										<dt>accessor</dt>
+										<dd>the accessor keys for piece and color. this will define what parts of the data is being shown on the heatmap. valid values:<br>
+											piece: <code>all, k, q, r, b, k, p</code><br>
+											color: <code>w, b</code>
+										</dd>
+
+										<dt>sizeScale</dt>
+										<dd>scale the size of the heatmap squares depending on the data value</dd>
+
+										<dt>colorScale</dt>
+										<dd>color the heatmap squares depending on the data value, optionally, you can pass an array of 2 colors to interpolate such as <code>['yellow', 'red']</code>. If set to true, but not supplied an array, the default interpolation is <code>['blue', 'red']</code>.</dd>
+									</dl>
+								</td>
+							</tr>
+							<tr>
+								<td>data</td>
+								<td>data formatted as:
+									<div data-render-json="heatmapData"></div>
+									<p>The data consists of an array of 64 elements (only 2 shown in the example above) representing the squares, from top-left to bottom-right in row order (<code>a8, b8, c8 ... ,f1, g1, h1</code>)</p>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+
+					<h4>data(data)</h4>
+					<p>Set or change the data of the graph. This method will automatically call <code>update()</code>. The data format needs to be the same as the one that the <code>constructor</code> accepts.</p>
+
+					<h4>options(options)</h4>
+					<p>Change graph options. This method will automatically call <code>update()</code>. You can change all the options as described in <code>constructor</code> except <strong>width</strong> and <strong>margin</strong>.</p>
+
+					<h4>update()</h4>
+					<p>Updates and re-draws the graph. You shouldn't need to call this under normal circumstances.</p>
+
+					<h3>Properties</h3>
+
+					<h4>container</h4>
+					<p>Holds the reference to the DOM object containing the <code>&lt;svg></code> element. Same object as if you had called <code>d3.select(selector)</code>.</p>
+
+					<h4>dataContainer</h4>
+					<p>Holds the reference to the <code>&lt;g></code> element containing the data elements</p>
+
+					<h4>dispatch</h4>
+					<p>d3 event dispatcher. You can hook your event handler to this property to listen to graph events.</p>
+
+					<h3>Events</h3>
+					<p>The events are dispatched via <code>this.dispatch</code>.</p>
+
+					<h4>mouseenter</h4>
+					<p>Will fire when mouse enters a heat square. The handler will be passed the current <code>data</code> (count) for the square.</p>
+
+					<h4>mousemove</h4>
+					<p>Will fire when mouse move around a heat square.</p>
+
+					<h4>mouseleave</h4>
+					<p>Will fire when mouse leaves a heat square.</p>
+
+					<h3>CSS</h3>
+					<p>The CSS classes for styleable elements of the heatmap.</p>
+
+					<dl>
+						<dt>.white rect</dt>
+						<dd>white chess board square</dd>
+
+						<dt>.white .label</dt>
+						<dd>white chess board square label (file or rank label)</dd>
+
+						<dt>.black rect</dt>
+						<dd>black chess board square</dd>
+
+						<dt>.black .label</dt>
+						<dd>black chess board square label (file or rank label)</dd>
+
+						<dt>.heat-square</dt>
+						<dd><code>rect</code> corresponding to a heat square</dd>
+					</dl>
+				</div>
+			</div>
+		</div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
+		<script src="http://simianstudios.com/portamento/portamento.js"></script>
+		<script src="vendor/json-formatter.js"></script>
+
+		<script>
+			var jsons = {
+				heatmapConfig: {
+					width: 500,
+					margin: 20,
+					accessor: {
+						piece: 'all',
+						color: 'w'
+					},
+					sizeScale: true,
+					colorScale: false
+				},
+				heatmapData: [{"p":{"w":10474,"b":0},"n":{"w":15363,"b":14358},"b":{"w":20070,"b":44285},"r":{"w":145263,"b":276080},"q":{"w":48169,"b":65100},"k":{"w":2605,"b":26610},"all":{"w":241944,"b":426433}},{"p":{"w":9383,"b":0},"n":{"w":10252,"b":97687},"b":{"w":24986,"b":36774},"r":{"w":117592,"b":668581},"q":{"w":49310,"b":131663},"k":{"w":5090,"b":104667},"all":{"w":216613,"b":1039372}}]
+			};
+
+			$(function () {
+				$('div[data-render-json]').each(function () {
+					var el = $(this);
+					var key = el.data('render-json');
+					// this.innerHTML = JSON.stringify(jsons[key], undefined, 4);
+					var jsonFormatter = new JSONFormatter(jsons[key], 2);
+					el.append(jsonFormatter.render());
+				});
+
+				$('.menu').each(function () {
+					$(this).portamento({wrapper: $(this).parent()});
+				});
+			});
+		</script>
+	</body>
+</html>

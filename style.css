@@ -1,0 +1,30 @@
+.row {
+	display: flex;
+}
+.row h3 small {
+	font-size: 0.5em;
+	color: gray;
+}
+.row h4 {
+	font-size: 1.4em;
+}
+
+#portamento_container {
+	position:relative;
+}
+
+#portamento_container .menu {
+	position:absolute;
+}
+
+#portamento_container .menu.fixed {
+	position:fixed;
+}
+
+table td {
+	vertical-align: top;
+}
+
+.menu li {
+	margin-bottom: 0;
+}
