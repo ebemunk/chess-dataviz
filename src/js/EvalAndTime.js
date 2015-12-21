@@ -5,27 +5,6 @@ import debug from 'debug';
 
 let log = debug('cdv:EvalAndTime');
 
-/*
-Plots evaluation & time usage for a game.
-Expects a game object such as:
-{
-	black: 'Giri, Anish',
-	blackElo: '2790',
-	blackImg: 'img/players/Giri.jpg',
-
-	white: 'Anand, Viswanathan',
-	whiteElo: '2791',
-	whiteImg: 'img/player/Anand.jpg',
-
-	winner: 'draw' OR 'white' OR 'black',
-
-	notation: [
-		{score: 0.15, time: 0.6}, //must not be strings
-		...
-	]
-}
-
-*/
 export class EvalAndTime {
 	constructor(selector, options, data) {
 		let self = this;
@@ -307,6 +286,10 @@ export class EvalAndTime {
 				self.dispatch.mouseleave();
 			})
 		;
+
+		if( data ) {
+			this.data(data);
+		}
 	}
 
 	data(data) {
