@@ -33,7 +33,7 @@
     "browserify": "^12.0.0",
     "css-mqpacker": "^4.0.0",
     "csswring": "^4.0.0",
-    "eslint": "^1.7.3",
+    "eslint": "^4.18.2",
     "gulp": "^3.9.0",
     "gulp-less": "^3.0.3",
     "gulp-plumber": "^1.0.1",
