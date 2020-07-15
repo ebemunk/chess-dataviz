@@ -17,7 +17,7 @@
     "colors": "^1.1.2",
     "debug": "^2.2.0",
     "highland": "^2.5.1",
-    "lodash": "^3.10.1",
+    "lodash": "^4.17.19",
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
     "phantom": "^0.8.0",
